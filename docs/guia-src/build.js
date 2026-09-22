@@ -14,7 +14,7 @@ const VERSAO = "1.0 — setembro de 2026";
 // ---------------------------------------------------------------- capa
 const capa = [
   Spacer(2400),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "UNINTER — Tecnologia em Ciência de Dados (EaD)", font: FONT, size: 26, color: "555555" })], spacing: { after: 120 } }),
+  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "UNINTER — Ensino a Distância (EaD)", font: FONT, size: 26, color: "555555" })], spacing: { after: 120 } }),
   new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Disciplina de Big Data", font: FONT, size: 28, color: "555555" })], spacing: { after: 900 } }),
   new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Sandbox Big Data", font: FONT, size: 64, bold: true, color: BLUE })], spacing: { after: 160 } }),
   new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Guia do Aluno", font: FONT, size: 44, color: BLUE })], spacing: { after: 400 } }),
