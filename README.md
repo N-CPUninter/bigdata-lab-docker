@@ -58,6 +58,15 @@ docs/                instalação, memória, diferenças para o HDP, validação
 tests/               testes de fumaça por aula
 ```
 
+## Publicar a imagem (professor)
+
+```powershell
+docker login ghcr.io                      # token do GitHub com escopo write:packages
+.\publish.ps1 -Mode registry -Version 1.0.1 -Registry ghcr.io/n-cpuninter/bigdata-sandbox
+# ou, para distribuir como arquivo (~7 GB): .\publish.ps1 -Mode save -Version 1.0.1
+```
+O workflow `.github/workflows/build.yml` faz o mesmo build no GitHub Actions a cada push na `main` (o runner precisa de ~40 GB livres; o workflow já limpa o disco).
+
 ## Construir a imagem localmente (opcional)
 
 A imagem publicada já vem pronta. Para reconstruir (60–90 min; baixa ~5 GB de RPMs do ODP e ~3 GB de tarballs):
