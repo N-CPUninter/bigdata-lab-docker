@@ -1,6 +1,6 @@
 # Validação — o que foi testado e o que ficou de fora
 
-Última rodada: 2026-09-19, imagem `bigdata-sandbox:1.0.0` (Ambari 2.7.11.0.0-161 + ODP 1.2.4.0-108) subida **do zero** (volumes novos) no Docker Desktop do Windows 11 (WSL2), container limitado a 7 GB, perfil `LAB_MEM=8g`: 30 verificações PASS, 1 SKIP (Phoenix). Os testes são os scripts de `tests/smoke/` (rodam `tests/ci.sh aula07 aula08 ...`).
+Última rodada: 2026-09-21, imagem `bigdata-sandbox:1.0.1` (Ambari 2.7.11.0.0-161 + ODP 1.2.4.0-108, com os cortes de memória do capítulo 7 do Guia) subida **do zero** (volumes novos) no Docker Desktop do Windows 11 (WSL2), container limitado a 7 GB, perfil `LAB_MEM=8g`: 30 verificações PASS, 0 FAIL, 1 SKIP (Phoenix). Consumo do container ao final da bateria: 3,9 GB. Os testes são os scripts de `tests/smoke/` (rodam `tests/ci.sh aula07 aula08 ...`).
 
 | Aula / perfil | O que o teste faz | Resultado |
 |---|---|---|
