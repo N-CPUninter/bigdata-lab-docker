@@ -7,7 +7,9 @@ cd "$(dirname "$0")"
 export MSYS_NO_PATHCONV=1
 sb() { docker compose exec sandbox lab "$@"; }
 case "${1:-help}" in
-  up)       docker compose up -d; echo "Aguardando o Ambari..."; sb wait-ambari; sb urls ;;
+  up)       docker compose up -d; echo "Aguardando o Ambari responder (2 a 4 minutos na primeira vez)..."; sb wait-ambari; sb urls
+            echo; echo "Ambari no ar. Próximo passo: ./lab.sh aula <perfil>   (ex.: aula 10, aula trabalho, aula 7)"
+            echo "Espere a mensagem PRONTO desse comando antes de usar o terminal, o SSH ou os comandos das aulas." ;;
   down)     docker compose --profile nosql down ;;
   nosql)    docker compose --profile nosql up -d mongo cassandra ;;
   aula)     shift; sb aula "$@" ;;

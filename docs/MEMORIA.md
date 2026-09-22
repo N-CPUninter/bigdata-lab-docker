@@ -19,7 +19,7 @@ A VM HDP 2.6.5 precisava de 8 GB só para ela (ou seja, um computador de 16 GB).
 
 Com 8 GB no computador: `.wslconfig` com `memory=6GB` e `swap=6GB` (Windows) ou 6 GB no Docker Desktop (macOS). Os perfis 7/8a/8d ficam lentos mas funcionam; feche o navegador com muitas abas.
 
-Com 12–16 GB: dê 10 GB ao Docker e use `.\lab.ps1 mem 16g` (heaps maiores, jobs mais rápidos).
+Com 16 GB ou mais: dê 10 GB ao Docker e use `.\lab.ps1 mem 16g` (Linux/macOS: `./lab.sh mem 16g`). Os heaps ficam maiores e os jobs mais rápidos; o perfil é o mesmo para 16, 32 ou 64 GB, não precisa ajustar nada além disso.
 
 ## Diferenças entre `8g` e `16g` além dos heaps
 

@@ -21,7 +21,14 @@ if (-not (Test-Path ".env") -and (Test-Path ".env.example")) { Copy-Item ".env.e
 function Invoke-Sandbox { param([string[]] $Cmd) docker compose exec sandbox lab @Cmd }
 
 switch ($Command) {
-  "up"     { docker compose up -d; Write-Host "Aguardando o Ambari..."; Invoke-Sandbox @("wait-ambari"); Invoke-Sandbox @("urls") }
+  "up"     {
+    docker compose up -d
+    Write-Host "Aguardando o Ambari responder (2 a 4 minutos na primeira vez)..."
+    Invoke-Sandbox @("wait-ambari"); Invoke-Sandbox @("urls")
+    Write-Host ""
+    Write-Host "Ambari no ar. Proximo passo: .\lab.ps1 aula <perfil>   (ex.: aula 10, aula trabalho, aula 7)"
+    Write-Host "Espere a mensagem PRONTO desse comando antes de usar o terminal, o SSH ou os comandos das aulas."
+  }
   "down"   { docker compose --profile nosql down }
   "nosql"  { docker compose --profile nosql up -d mongo cassandra }
   "aula"   { Invoke-Sandbox (@("aula") + $Args) }

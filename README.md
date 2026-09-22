@@ -2,7 +2,7 @@
 
 Ambiente Hadoop completo em **um container Docker**, para as aulas práticas 7–12 e a Atividade Prática da disciplina de Big Data. Mantém o que os vídeos mostram (Ambari, `maria_dev`, `sandbox.hortonworks.com`, portas 8080/4200/2222) usando componentes atuais e mantidos (Ambari 2.7.11 + ODP 1.2.4, o fork aberto do HDP).
 
-Cada aula liga **só os serviços que usa**, por isso roda em computadores com 8 GB de RAM (12–16 GB é o confortável). Veja [docs/MEMORIA.md](docs/MEMORIA.md).
+Cada aula liga **só os serviços que usa**, por isso roda em computadores com 8 GB de RAM (16 GB ou mais é o confortável). Veja [docs/MEMORIA.md](docs/MEMORIA.md).
 
 ## Requisitos
 
@@ -14,15 +14,21 @@ Cada aula liga **só os serviços que usa**, por isso roda em computadores com 8
 ## Início rápido
 
 ```powershell
-# 1. baixe/clone este projeto e abra um PowerShell dentro da pasta
-# 2. suba a sandbox (a primeira vez baixa a imagem: vários GB; ~22 GB em disco)
-.\lab.ps1 up
-# 3. prepare a aula desejada
-.\lab.ps1 aula 7          # 7, 7a, 8a, 8b, 8c, 8d, 9a, 9b, 9c, 9d, 10, 11, 12, trabalho
-# 4. abra um terminal dentro da sandbox (ou http://localhost:4200)
-.\lab.ps1 shell
+# Windows (PowerShell, dentro da pasta do projeto)      | Linux / macOS (terminal, dentro da pasta)
+.\lab.ps1 up                                           | ./lab.sh up            # sobe a sandbox (1ª vez baixa a imagem)
+.\lab.ps1 aula 7                                       | ./lab.sh aula 7        # prepara a aula 7 (liga só os serviços dela)
+.\lab.ps1 shell                                        | ./lab.sh shell         # terminal dentro da sandbox (ou http://localhost:4200)
 ```
-Linux/macOS: use `./lab.sh` com os mesmos comandos.
+O argumento de `aula` é o **perfil**: `7`, `7a`, `8a`, `8b`, `8c`, `8d`, `9a`, `9b`, `9c`, `9d`, `10`, `11`, `12`, `trabalho` ou `none`. Exemplos:
+
+```powershell
+.\lab.ps1 aula 10          # ./lab.sh aula 10         PySpark (aula 10); o mesmo perfil serve para a 11
+.\lab.ps1 aula 11          # ./lab.sh aula 11         idêntico ao 10 (ZooKeeper + HDFS)
+.\lab.ps1 aula trabalho    # ./lab.sh aula trabalho   Atividade Prática (ZooKeeper + HDFS para o Files View)
+.\lab.ps1 aula none        # ./lab.sh aula none       desliga todos os serviços; só o Ambari fica no ar
+```
+
+**Espere a mensagem `PRONTO`** que o `aula` imprime (com o tempo decorrido) antes de abrir o terminal, conectar por SSH ou rodar qualquer comando das aulas: enquanto os serviços estão subindo, `hdfs`, `hive`, `pig` etc. falham. Ligar um perfil leva de 1 a 6 minutos conforme a aula e o computador.
 
 Acessos: Ambari `http://localhost:8080` (`admin/admin`, `raj_ops/raj_ops`, `maria_dev/maria_dev`), shell web `http://localhost:4200`, página com todos os links `http://localhost:8888`, SSH `ssh -p 2222 maria_dev@localhost`.
 
@@ -34,17 +40,17 @@ A **Atividade Prática** pode ser feita nesta sandbox ou no [notebook do Google 
 
 ## Comandos do dia a dia
 
-| Comando | O que faz |
-|---|---|
-| `.\lab.ps1 up` / `down` | sobe / para a sandbox (os dados ficam guardados em volumes) |
-| `.\lab.ps1 aula <perfil>` | desliga o que não é da aula e liga o que é |
-| `.\lab.ps1 status` | serviços ligados e memória em uso |
-| `.\lab.ps1 nosql` | sobe MongoDB e Cassandra (aulas 8c/8d) |
-| `.\lab.ps1 mem 16g` | perfil de memória para máquinas com 16 GB (padrão: `8g`) |
-| `.\lab.ps1 shell` | terminal como `maria_dev` |
-| `.\lab.ps1 reset` | apaga tudo e volta ao estado inicial |
+| Windows | Linux / macOS | O que faz |
+|---|---|---|
+| `.\lab.ps1 up` / `down` | `./lab.sh up` / `down` | sobe / para a sandbox (os dados ficam guardados em volumes) |
+| `.\lab.ps1 aula <perfil>` | `./lab.sh aula <perfil>` | desliga o que não é da aula e liga o que é; termina com `PRONTO` |
+| `.\lab.ps1 status` | `./lab.sh status` | serviços ligados e memória em uso |
+| `.\lab.ps1 nosql` | `./lab.sh nosql` | sobe MongoDB e Cassandra (aulas 8c/8d) |
+| `.\lab.ps1 mem 16g` | `./lab.sh mem 16g` | perfil de memória para máquinas com 16 GB ou mais (padrão: `8g`) |
+| `.\lab.ps1 shell` | `./lab.sh shell` | terminal como `maria_dev` |
+| `.\lab.ps1 reset` | `./lab.sh reset` | apaga tudo e volta ao estado inicial |
 
-Ao terminar de estudar, rode `.\lab.ps1 stop-all` ou `.\lab.ps1 down`: os serviços consomem cada vez mais memória se ficarem ligados por muitas horas (veja [docs/MEMORIA.md](docs/MEMORIA.md)).
+Ao terminar de estudar, rode `.\lab.ps1 stop-all` ou `.\lab.ps1 down` (`./lab.sh stop-all` / `./lab.sh down`): os serviços consomem cada vez mais memória se ficarem ligados por muitas horas (veja [docs/MEMORIA.md](docs/MEMORIA.md)).
 
 Dentro da sandbox o mesmo CLI existe como `lab` (`lab aula 8a`, `lab storm start`, `lab jupyter start`, `lab urls`).
 

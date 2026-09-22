@@ -34,10 +34,14 @@ Uso: lab <comando>
 EOF
 }
 
+fmt_secs() { printf '%dm%02ds' $(( $1 / 60 )) $(( $1 % 60 )); }
+
 wait_ambari() {
-  for _ in $(seq 1 180); do
+  local i
+  for i in $(seq 1 180); do
     code=$("${CURL[@]}" -o /dev/null -w '%{http_code}' "$AMB/clusters/$CLUSTER" 2>/dev/null || true)
     [ "$code" = "200" ] && return 0
+    [ $(( i % 10 )) -eq 0 ] && log "aguardando o Ambari responder... ($(fmt_secs $(( i * 3 ))))"
     sleep 3
   done
   die "Ambari não respondeu em http://localhost:8080"
@@ -54,9 +58,11 @@ wait_agent() {
 }
 
 wait_request() {
-  local url="$1" st
+  local url="$1" st t=0
   [ -z "$url" ] && return 0
   while :; do
+    [ "$t" -gt 0 ] && [ $(( t % 30 )) -eq 0 ] && log "  ... ainda em andamento ($(fmt_secs "$t")); aguarde"
+    t=$(( t + 5 ))
     st=$("${CURL[@]}" "$url" | python3 -c "import json,sys; r=json.load(sys.stdin)['Requests']; print(r['request_status'])" 2>/dev/null || echo PENDING)
     case "$st" in
       COMPLETED) return 0 ;;
@@ -141,6 +147,8 @@ cmd_aula() {
   svcs=$(echo "$line" | cut -d'|' -f2 | xargs)
   desc=$(echo "$line" | cut -d'|' -f3 | xargs)
   log "Aula $perfil — $desc"
+  log "Isso leva alguns minutos. Espere a mensagem PRONTO antes de usar o terminal, o SSH ou as interfaces web."
+  SECONDS=0
   wait_ambari; wait_agent
   # desliga o que não faz parte do perfil
   local running keep svc
@@ -156,7 +164,11 @@ cmd_aula() {
     [ "$svc" = OOZIE ] && prep_oozie_sharelib
   done
   case "$perfil" in 8a|8d|7) cmd_seed_hive ;; esac
-  log "pronto. Perfil '$perfil' ativo."
+  local up; up=$(all_services | awk '$2=="STARTED"{print $1}' | paste -sd, -)
+  log "=================================================================="
+  log "PRONTO em $(fmt_secs "$SECONDS"). Perfil '$perfil' ativo. Serviços de pé: ${up:-nenhum}."
+  log "Agora você pode abrir o terminal (http://localhost:4200), o SSH e as interfaces web."
+  log "=================================================================="
   cmd_urls
 }
 

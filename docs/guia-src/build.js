@@ -33,11 +33,16 @@ const sumario = [
 ];
 
 // ---------------------------------------------------------------- 1. introdução
+const CodeLab = (args, comment = "") => Code([
+  (".\\lab.ps1 " + args).padEnd(30) + "# Windows" + (comment ? " — " + comment : ""),
+  ("./lab.sh " + args).padEnd(30) + "# Linux / macOS" + (comment ? " — " + comment : ""),
+]);
+
 const intro = [
   H1("1. Introdução"),
   P("A disciplina de Big Data usa, nas aulas práticas, a máquina virtual Hortonworks HDP 2.6.5. Essa máquina foi descontinuada: o download não está mais disponível, os repositórios de pacotes deixaram de existir, o boot leva de trinta a sessenta minutos (e cerca de doze horas em computadores Apple com chip M1/M2/M3) e ela exige 8 GB de memória só para si."),
   P("A **Sandbox Big Data** substitui essa máquina virtual por um ambiente Docker. Ela mantém o que os vídeos das aulas mostram (o Ambari, o usuário `maria_dev`, o nome `sandbox.hortonworks.com`, as mesmas portas e senhas) usando componentes atuais e mantidos: Apache Ambari 2.7.11 e a distribuição ODP 1.2.4, que é a continuação em código aberto do HDP."),
-  P("A diferença mais importante para quem tem um computador modesto: em vez de ligar todos os serviços de uma vez, a sandbox liga **somente os serviços que cada aula usa**. Por isso ela roda em computadores com 8 GB de RAM, embora 12 a 16 GB tornem o uso mais confortável."),
+  P("A diferença mais importante para quem tem um computador modesto: em vez de ligar todos os serviços de uma vez, a sandbox liga **somente os serviços que cada aula usa**. Por isso ela roda em computadores com 8 GB de RAM, embora 16 GB ou mais tornem o uso mais confortável."),
   H2("1.1 O que você vai encontrar neste guia"),
   Bullet("Como instalar o Docker e a sandbox no Windows, macOS ou Linux (capítulo 2)."),
   Bullet("Como ligar a sandbox, preparar uma aula e acessar o Ambari, o terminal e as demais interfaces (capítulos 3 e 4)."),
@@ -48,7 +53,7 @@ const intro = [
   H2("1.2 Convenções usadas no texto"),
   P("Comandos e nomes de arquivos aparecem em fonte monoespaçada, como `lab aula 7`. Blocos de comando aparecem em caixas cinza; digite-os linha a linha. Comandos que começam com `.\\lab.ps1` são executados no PowerShell do **seu computador**, dentro da pasta do projeto. Comandos como `lab`, `hdfs`, `pig` ou `spark-submit` são executados **dentro da sandbox** (no terminal web ou por SSH), como usuário `maria_dev`."),
   Spacer(60),
-  Note("Windows, macOS e Linux", "Nos exemplos usamos o PowerShell do Windows (`.\\lab.ps1`). No macOS e no Linux o script equivalente é `./lab.sh`, com os mesmos subcomandos."),
+  Note("Windows, macOS e Linux", "Os blocos de comando mostram sempre as duas formas: `.\\lab.ps1 ...` no PowerShell do Windows e `./lab.sh ...` no terminal do macOS ou do Linux. São o mesmo utilitário, com os mesmos subcomandos; use a linha do seu sistema."),
 ];
 
 // ---------------------------------------------------------------- 2. instalação
@@ -56,7 +61,7 @@ const instal = [
   H1("2. Requisitos e instalação"),
   H2("2.1 Requisitos"),
   ...TblS(["Item", "Mínimo", "Recomendado"], [
-    ["Memória RAM", "8 GB", "16 GB"],
+    ["Memória RAM", "8 GB", "16 GB ou mais"],
     ["Processador", "2 núcleos, 64 bits, com virtualização ativada", "4 núcleos ou mais"],
     ["Espaço em disco livre", "40 GB (a imagem ocupa cerca de 22 GB)", "60 GB"],
     ["Sistema operacional", "Windows 10/11 com WSL2, macOS 12 ou superior, Linux", "—"],
@@ -86,7 +91,7 @@ const instal = [
   ...Code(["Set-ExecutionPolicy -Scope CurrentUser RemoteSigned"]),
   H2("2.3 macOS"),
   Num("Baixe e instale o Docker Desktop pelo guia oficial [Docker Desktop para Mac](https://docs.docker.com/desktop/setup/install/mac-install/), escolhendo o instalador do seu chip (Apple Silicon ou Intel). Arraste o ícone para a pasta Aplicativos e abra-o.", "steps2"),
-  Num("Em **Settings > Resources**, mova o controle de memória para pelo menos 6 GB (10 GB se o Mac tiver 16 GB) e clique em “Apply”.", "steps2"),
+  Num("Em **Settings > Resources**, mova o controle de memória para pelo menos 6 GB (10 GB se o Mac tiver 16 GB ou mais) e clique em “Apply”.", "steps2"),
   Num("Mac com chip Apple (M1, M2, M3): em **Settings > General**, marque “Use Rosetta for x86_64/amd64 emulation on Apple Silicon”. A imagem da sandbox é x86_64. Se o macOS pedir para instalar o Rosetta, aceite. Detalhes em [Docker Desktop no Apple Silicon](https://docs.docker.com/desktop/setup/install/mac-install/#mac-with-apple-silicon).", "steps2"),
   Num("Baixe o ZIP do projeto pela plataforma, dê dois cliques para extrair e mova a pasta para um local sem espaços no nome (por exemplo `~/bigdata-lab`).", "steps2"),
   Num("Abra o **Terminal** (Launchpad > Outros > Terminal), entre na pasta com `cd ~/bigdata-lab` e execute `./lab.sh up`. Se aparecer “permission denied”, execute antes `chmod +x lab.sh`.", "steps2"),
@@ -95,16 +100,34 @@ const instal = [
   Num("Adicione seu usuário ao grupo `docker` para não precisar de `sudo`: `sudo usermod -aG docker $USER`, depois saia e entre novamente na sessão. Referência: [Linux post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).", "steps3"),
   Num("Extraia o ZIP do projeto (`unzip bigdata-lab.zip -d ~/bigdata-lab`), entre na pasta e execute `./lab.sh up`.", "steps3"),
   H2("2.5 A primeira subida"),
-  P("Na primeira execução de `.\\lab.ps1 up` o Docker baixa a imagem da sandbox. O tempo depende da sua conexão. Em seguida o Ambari leva de dois a quatro minutos para responder; o script espera por isso e, ao final, mostra as URLs de acesso. A partir da segunda vez a sandbox sobe em cerca de um minuto."),
-  Note("Atualizações", "Quando o professor publicar uma nova versão da imagem, execute `docker compose pull` dentro da pasta do projeto e depois `.\\lab.ps1 up`. Seus dados (HDFS, bancos, arquivos da `maria_dev`) ficam em volumes do Docker e sobrevivem à atualização."),
+  P("Na primeira execução de `.\\lab.ps1 up` (ou `./lab.sh up`) o Docker baixa a imagem da sandbox. O tempo depende da sua conexão. Em seguida o Ambari leva de dois a quatro minutos para responder; o script espera por isso, mostra as URLs de acesso e indica o próximo passo: `aula <perfil>`. A partir da segunda vez a sandbox sobe em cerca de um minuto."),
+  P("Subir a sandbox **não** liga os serviços das aulas. Só o Ambari fica no ar. É o comando `aula`, descrito no capítulo 3, que liga o HDFS, o YARN, o Hive e os demais serviços de cada aula, e ele termina com a mensagem `PRONTO`. Até lá, não tente rodar comandos das aulas."),
+  Note("Atualizações", "Quando o professor publicar uma nova versão da imagem, execute `docker compose pull` dentro da pasta do projeto e depois `.\\lab.ps1 up` (ou `./lab.sh up`). Seus dados (HDFS, bancos, arquivos da `maria_dev`) ficam em volumes do Docker e sobrevivem à atualização."),
 ];
 
 // ---------------------------------------------------------------- 3. uso
 const uso = [
   H1("3. Uso no dia a dia"),
   H2("3.1 Os três comandos"),
-  ...Code([".\\lab.ps1 up            # sobe a sandbox e espera o Ambari responder", ".\\lab.ps1 aula 7        # prepara a aula 7 (liga só os serviços dela)", ".\\lab.ps1 shell         # abre um terminal dentro da sandbox, como maria_dev"]),
-  P("O subcomando `aula` é o coração da sandbox: ele **desliga** os serviços que a aula não usa e **liga** os que ela usa, esperando cada um ficar de pé. Os perfis disponíveis estão na tabela a seguir."),
+  P("Tudo o que você precisa no dia a dia cabe em três comandos, executados no seu computador, dentro da pasta do projeto. À esquerda a forma do Windows (PowerShell); à direita a do Linux e do macOS."),
+  ...TblS(["Windows (PowerShell)", "Linux / macOS (terminal)", "O que faz"], [
+    ["`.\\lab.ps1 up`", "`./lab.sh up`", "1. Sobe a sandbox e espera o Ambari responder"],
+    ["`.\\lab.ps1 aula 7`", "`./lab.sh aula 7`", "2. Prepara a aula 7: liga só os serviços dela e termina com `PRONTO`"],
+    ["`.\\lab.ps1 shell`", "`./lab.sh shell`", "3. Abre um terminal dentro da sandbox, como `maria_dev`"],
+  ], [2.2, 2.2, 4.6]),
+  P("O subcomando `aula` é o coração da sandbox: ele **desliga** os serviços que a aula não usa e **liga** os que ela usa, esperando cada um ficar de pé. O argumento que você passa a ele é o **perfil**: o número da aula (`7`, `10`, `11`, `12`), uma parte de uma aula grande (`8a`, `8b`, `9c`), a palavra `trabalho` para a Atividade Prática ou `none` para desligar tudo. Alguns exemplos:"),
+  ...TblS(["Windows (PowerShell)", "Linux / macOS (terminal)", "Resultado"], [
+    ["`.\\lab.ps1 aula 10`", "`./lab.sh aula 10`", "Aula 10 (PySpark): liga ZooKeeper e HDFS"],
+    ["`.\\lab.ps1 aula 11`", "`./lab.sh aula 11`", "Aula 11: os mesmos serviços da 10; se você veio da aula 10, nada muda"],
+    ["`.\\lab.ps1 aula trabalho`", "`./lab.sh aula trabalho`", "Atividade Prática: ZooKeeper e HDFS, para o upload pelo Files View"],
+    ["`.\\lab.ps1 aula 8a`", "`./lab.sh aula 8a`", "Primeira parte da aula 8: HDFS, YARN, MapReduce2 e Hive"],
+    ["`.\\lab.ps1 aula none`", "`./lab.sh aula none`", "Fim dos estudos: desliga todos os serviços; só o Ambari fica no ar"],
+  ], [2.2, 2.2, 4.6]),
+  Note("Espere a mensagem PRONTO", [
+    "Ligar os serviços leva de um a seis minutos, conforme o perfil e o computador. Enquanto isso o comando mostra o que está ligando e, a cada 30 segundos, o tempo decorrido. Ao final ele imprime uma faixa com `PRONTO em XmYYs`, a lista dos serviços de pé e as URLs.",
+    "**Só depois dessa mensagem** abra o terminal web, conecte por SSH ou rode os comandos das aulas. Antes dela, `hdfs`, `hive`, `pig`, `spark-submit` e as interfaces web falham ou ficam presos, porque os serviços ainda estão subindo. Se tiver dúvida, `.\\lab.ps1 status` (ou `./lab.sh status`) mostra o que está `STARTED`; no Ambari, todos os serviços do perfil devem estar verdes.",
+  ]),
+  P("Os perfis disponíveis estão na tabela a seguir."),
   ...TblS(["Perfil", "Serviços ligados", "Conteúdo"], [
     ["7", "ZooKeeper, HDFS, YARN, MapReduce2, Hive, Oozie", "Pig e Oozie"],
     ["7a", "ZooKeeper, HDFS, YARN, MapReduce2, Hive", "Só Pig (mais leve)"],
@@ -122,18 +145,18 @@ const uso = [
     ["none", "nenhum", "Desliga tudo; só o Ambari fica no ar"],
   ], [1.2, 4, 3.5]),
   H2("3.2 Outros subcomandos"),
-  ...TblS(["Comando", "O que faz"], [
-    ["`.\\lab.ps1 status`", "Serviços ligados no Ambari e memória em uso"],
-    ["`.\\lab.ps1 stop-all`", "Desliga todos os serviços (o container continua)"],
-    ["`.\\lab.ps1 down`", "Para o container; dados preservados nos volumes"],
-    ["`.\\lab.ps1 nosql`", "Sobe os containers MongoDB e Cassandra (aulas 8c e 8d)"],
-    ["`.\\lab.ps1 mem 16g`", "Perfil de memória para máquinas com 16 GB (padrão: `8g`)"],
-    ["`.\\lab.ps1 logs`", "Mostra o log da sandbox"],
-    ["`.\\lab.ps1 reset`", "Apaga tudo (HDFS, bancos, arquivos) e volta ao estado inicial. Pede confirmação"],
-  ], [2, 5]),
+  ...TblS(["Windows", "Linux / macOS", "O que faz"], [
+    ["`.\\lab.ps1 status`", "`./lab.sh status`", "Serviços ligados no Ambari e memória em uso"],
+    ["`.\\lab.ps1 stop-all`", "`./lab.sh stop-all`", "Desliga todos os serviços (o container continua)"],
+    ["`.\\lab.ps1 down`", "`./lab.sh down`", "Para o container; dados preservados nos volumes"],
+    ["`.\\lab.ps1 nosql`", "`./lab.sh nosql`", "Sobe os containers MongoDB e Cassandra (aulas 8c e 8d)"],
+    ["`.\\lab.ps1 mem 16g`", "`./lab.sh mem 16g`", "Perfil de memória para máquinas com 16 GB ou mais (padrão: `8g`)"],
+    ["`.\\lab.ps1 logs`", "`./lab.sh logs`", "Mostra o log da sandbox"],
+    ["`.\\lab.ps1 reset`", "`./lab.sh reset`", "Apaga tudo (HDFS, bancos, arquivos) e volta ao estado inicial. Pede confirmação"],
+  ], [2, 2, 4.5]),
   P("Dentro da sandbox o mesmo utilitário existe como `lab`: `lab aula 8a`, `lab status`, `lab storm start`, `lab urls` e assim por diante."),
   Note("Ao terminar de estudar", [
-    "Execute `.\\lab.ps1 stop-all` ou `.\\lab.ps1 down`. Os serviços consomem cada vez mais memória se ficarem ligados por muitas horas, mesmo sem uso, e o computador fica lento. O capítulo 7 explica o motivo.",
+    "Execute `.\\lab.ps1 stop-all` ou `.\\lab.ps1 down` (`./lab.sh stop-all` ou `./lab.sh down`). Os serviços consomem cada vez mais memória se ficarem ligados por muitas horas, mesmo sem uso, e o computador fica lento. O capítulo 7 explica o motivo.",
   ]),
   H2("3.3 Onde ficam os arquivos"),
   P("A pasta do projeto no seu computador tem duas subpastas que aparecem dentro da sandbox:"),
@@ -152,9 +175,9 @@ const amb = [
     ["SSH ([PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) ou terminal)", "`ssh -p 2222 maria_dev@localhost`", "`maria_dev`"],
     ["Página com todos os links", "http://localhost:8888", "—"],
     ["MariaDB (o MySQL das aulas)", "`mysql -u root -phadoop` dentro da sandbox", "`root/hadoop`"],
-    ["Root do Linux da sandbox", "`.\\lab.ps1 root`", "`root/hadoop`"],
+    ["Root do Linux da sandbox", "`.\\lab.ps1 root` ou `./lab.sh root`", "`root/hadoop`"],
   ], [2.5, 3, 3]),
-  P("No PuTTY, informe Host Name `localhost`, Port `2222`, Connection type SSH, e faça login como `maria_dev`. O nome do host continua sendo `sandbox.hortonworks.com`, o HDFS responde em `hdfs://sandbox.hortonworks.com:8020` e o ResourceManager na porta 8050. Por isso os arquivos de configuração das aulas (como o `job.properties` do Oozie) funcionam sem alteração."),
+  P("O terminal web e o SSH aceitam login assim que a sandbox sobe, mas os comandos das aulas só funcionam depois que o `aula <perfil>` imprimir `PRONTO`. No PuTTY, informe Host Name `localhost`, Port `2222`, Connection type SSH, e faça login como `maria_dev`. O nome do host continua sendo `sandbox.hortonworks.com`, o HDFS responde em `hdfs://sandbox.hortonworks.com:8020` e o ResourceManager na porta 8050. Por isso os arquivos de configuração das aulas (como o `job.properties` do Oozie) funcionam sem alteração."),
   H2("4.2 Interfaces web"),
   ...TblS(["Interface", "Endereço", "Quando está disponível"], [
     ["Ambari (serviços, Files View, Workflow Manager)", "http://localhost:8080", "Sempre"],
@@ -191,7 +214,7 @@ const aulas = [
   P("Cada seção começa pelo comando que prepara a sandbox e depois segue a ordem do vídeo, apontando o que mudou. Os arquivos citados estão em `~/aulas/aulaNN` dentro da sandbox."),
 
   H2("5.1 Aula 7 — Pig e Oozie"),
-  ...Code([".\\lab.ps1 aula 7       # ou  aula 7a  (só Pig, mais leve)"]),
+  ...CodeLab("aula 7", "ou aula 7a (só Pig, mais leve)"),
   P("O `ml-100k` já está no HDFS em `/user/maria_dev/ml-100k`. O vídeo mostra o envio pelo Files View; você pode repetir para praticar, a pasta é a mesma."),
   H3("Pig"),
   P("O Pig View não está disponível; use o terminal, como o vídeo faz na segunda parte. O `pig` roda no Tez sobre o YARN lendo do HDFS. Existe também o modo local (`pig -x local`), que lê do disco: nesse caso troque `/user/maria_dev/ml-100k` por `/home/maria_dev/data/ml-100k` no script."),
@@ -205,10 +228,10 @@ const aulas = [
   H2("5.2 Aula 8 — Hive, Sqoop, MapReduce, HBase, NoSQL, Drill e Presto"),
   P("A aula 8 usa muitos serviços e não cabe inteira em 8 GB. Ela foi dividida em quatro perfis; prepare um de cada vez."),
   ...TblS(["Perfil", "Comando", "Temas"], [
-    ["8a", "`.\\lab.ps1 aula 8a`", "Hive, Sqoop e MariaDB, MapReduce com mrjob"],
-    ["8b", "`.\\lab.ps1 aula 8b`", "HBase e Pig com HBaseStorage"],
-    ["8c", "`.\\lab.ps1 nosql` e depois `.\\lab.ps1 aula 8c`", "MongoDB, Cassandra e Spark 2"],
-    ["8d", "`.\\lab.ps1 nosql` e depois `.\\lab.ps1 aula 8d`", "Drill e Presto"],
+    ["8a", "`.\\lab.ps1 aula 8a` / `./lab.sh aula 8a`", "Hive, Sqoop e MariaDB, MapReduce com mrjob"],
+    ["8b", "`.\\lab.ps1 aula 8b` / `./lab.sh aula 8b`", "HBase e Pig com HBaseStorage"],
+    ["8c", "`.\\lab.ps1 nosql` e depois `.\\lab.ps1 aula 8c` (Linux/macOS: `./lab.sh nosql`, `./lab.sh aula 8c`)", "MongoDB, Cassandra e Spark 2"],
+    ["8d", "`.\\lab.ps1 nosql` e depois `.\\lab.ps1 aula 8d` (Linux/macOS: `./lab.sh nosql`, `./lab.sh aula 8d`)", "Drill e Presto"],
   ], [1, 3.5, 4]),
   H3("8a — Hive"),
   P("No HDP as tabelas eram criadas pelo “Upload Table” do Hive View, que não existe mais. O `lab aula 8a` cria automaticamente as tabelas `ratings` e `names` com o mesmo layout do vídeo. Para consultar, use o `beeline` (o comando `hive` também o abre):"),
@@ -226,7 +249,7 @@ const aulas = [
   Note("Phoenix — limitação conhecida", "O Phoenix 5.1.3 que vem na distribuição ODP 1.2.4 não é compatível com o HBase 2.5.6 da mesma distribuição: a conexão falha tanto no `sqlline.py` quanto no Query Server. Enquanto não houver um client compatível, estude o Phoenix pela leitura do `Phoenix.txt` (com o DDL corrigido) e pratique o acesso ao HBase pelo `hbase shell`, pelo Pig e pelo Spark."),
   H3("8c — MongoDB e Cassandra"),
   P("No HDP o Mongo era instalado como serviço do Ambari e o Cassandra por `yum`; os dois repositórios não existem mais. Na sandbox eles são dois containers oficiais que compartilham a rede da sandbox e continuam respondendo em `127.0.0.1`, de modo que os scripts `MongoSpark.py` e `CassandraSpark.py` rodam sem alteração."),
-  ...Code([".\\lab.ps1 nosql        # no seu computador: sobe mongo e cassandra"]),
+  ...CodeLab("nosql", "sobe mongo e cassandra"),
   P("Dentro da sandbox, com o Spark 2 (os pacotes já estão em cache, nada é baixado):"),
   ...Code(["export SPARK_MAJOR_VERSION=2", "cd ~/aulas/aula08/MongoDB", "spark-submit --packages org.mongodb.spark:mongo-spark-connector_2.12:2.4.4 MongoSpark.py", "cd ~/aulas/aula08/Cassandra", "spark-submit \\", "  --packages com.datastax.spark:spark-cassandra-connector_2.12:2.5.2 \\", "  CassandraSpark.py"]),
   P("Antes do `CassandraSpark.py` crie o keyspace e a tabela (comandos do `installing.txt`). Os shells rodam **no seu computador**, não dentro da sandbox:"),
@@ -240,10 +263,10 @@ const aulas = [
 
   H2("5.3 Aula 9 — Flume, Kafka, Storm e Flink"),
   ...TblS(["Perfil", "Comando", "Tema"], [
-    ["9a", "`.\\lab.ps1 aula 9a`", "Flume"],
-    ["9b", "`.\\lab.ps1 aula 9b`", "Kafka"],
-    ["9c", "`.\\lab.ps1 aula 9c` e, na sandbox, `lab storm start`", "Storm"],
-    ["9d", "`.\\lab.ps1 aula 9d`", "Flink"],
+    ["9a", "`.\\lab.ps1 aula 9a` / `./lab.sh aula 9a`", "Flume"],
+    ["9b", "`.\\lab.ps1 aula 9b` / `./lab.sh aula 9b`", "Kafka"],
+    ["9c", "`.\\lab.ps1 aula 9c` / `./lab.sh aula 9c` e, na sandbox, `lab storm start`", "Storm"],
+    ["9d", "`.\\lab.ps1 aula 9d` / `./lab.sh aula 9d`", "Flink"],
   ], [1, 4, 3.5]),
   P("Os temas de Hive, HBase, Mongo, Cassandra, Drill e Presto da aula 9 são os mesmos da aula 8; o Spark Streaming está na aula 12."),
   H3("Flume (9a)"),
@@ -269,7 +292,7 @@ const aulas = [
   ...Code(["cd ~ && tar -xzf downloads/flink-1.20.5-bin-scala_2.12.tgz && cd flink-1.20.5", "grep -q '^rest.port' conf/config.yaml \\", "  && sed -i 's/^rest.port: .*/rest.port: 8082/' conf/config.yaml \\", "  || echo 'rest.port: 8082' >> conf/config.yaml", "./bin/start-cluster.sh                      # UI: http://localhost:8082", "./bin/flink run examples/streaming/SocketWindowWordCount.jar --port 9000", "# em outro terminal:  nc -l 9000   e digite palavras", "tail -f log/flink-*-taskexecutor-*.out", "./bin/stop-cluster.sh"]),
 
   H2("5.4 Aulas 10 e 11 — PySpark"),
-  ...Code([".\\lab.ps1 aula 10"]),
+  ...CodeLab("aula 10"),
   P("Liga apenas ZooKeeper e HDFS; o Spark roda em modo local. Como no HDP, os scripts leem `u.data`, `u.item` e `customer-orders.csv` do **HDFS** (`/user/maria_dev`). No vídeo o professor envia esses arquivos pelo Files View; na sandbox eles já estão lá, e você pode repetir o envio para praticar. Os `open(\"u.item\")` do Python leem o arquivo local da pasta do script."),
   ...Code(["cd ~/aulas/aula10/01-RatingsCounter && spark-submit ratings-counter.py", "cd ~/aulas/aula10/02-CustomerOrder", "spark-submit customer-orders.py && spark-submit customer-orders-ordered.py", "cd ~/aulas/aula10/03-MostPopularMovies", "spark-submit popular-movies.py && spark-submit popular-movies-names.py", "spark-submit popular-movies-dataframe.py", "cd ~/aulas/aula10/04-SparkSQL && spark-submit spark-sql.py", "cd ~/aulas/aula10/05-MLLib && spark-submit movie-recommendations-als.py 50"]),
   Bullet("Os scripts rodam no Spark 3 (padrão) e no Spark 2 (`export SPARK_MAJOR_VERSION=2`)."),
@@ -278,7 +301,7 @@ const aulas = [
   Bullet("A aula 11 repete a aula 10; a pasta `aula11` tem os mesmos arquivos."),
 
   H2("5.5 Aula 12 — Spark Streaming e Structured Streaming"),
-  ...Code([".\\lab.ps1 aula 12"]),
+  ...CodeLab("aula 12"),
   P("O exercício Flume → Spark exige o **Spark 2**: o pacote `spark-streaming-flume` não existe no Spark 3. A sandbox mantém o Spark 2.4.8 justamente para isso. Abra três terminais (o terminal web abre quantas abas quiser)."),
   ...Code(["# terminal 1 — Spark", "cd ~/aulas/aula12/SparkStreaming", "export SPARK_MAJOR_VERSION=2", "spark-submit --packages org.apache.spark:spark-streaming-flume_2.12:2.4.8 SparkFlume.py"]),
   ...Code(["# terminal 2 — Flume com sink Avro na porta 9092", "cp ~/aulas/aula12/SparkStreaming/sparkstreamingflume.conf ~/", "cd /usr/hdp/current/flume-server/", "bin/flume-ng agent --conf conf --conf-file ~/sparkstreamingflume.conf --name a1"]),
@@ -307,7 +330,7 @@ const trab = [
   ...Code(["!wget https://raw.githubusercontent.com/N-CPUninter/Big_Data/main/data/imdb-reviews-pt-br.zip \\", "      -O imdb-reviews-pt-br.zip", "!unzip imdb-reviews-pt-br.zip", "!pip install pyspark", "", "from pyspark.sql import SparkSession", "spark = (SparkSession.builder.appName('PySpark Trabalho de Big Data')", "         .master('local').getOrCreate())", "imdb_df = spark.read.csv('imdb-reviews-pt-br.csv', header=True,", "                         quote='\"', escape='\"', encoding='UTF-8')"]),
   Note("Sessão do Colab", "O Colab desliga a máquina após algum tempo sem uso e apaga os arquivos baixados. Se isso acontecer, execute as células do início novamente (download, unzip, pip). O código que você escreveu fica salvo no notebook."),
   H2("6.2 Opção B — Sandbox Docker"),
-  ...Code([".\\lab.ps1 aula trabalho      # liga ZooKeeper e HDFS"]),
+  ...CodeLab("aula trabalho", "liga ZooKeeper e HDFS"),
   H3("Colocar o dataset na sandbox"),
   Num("Baixe o dataset: [imdb-reviews-pt-br.zip](https://raw.githubusercontent.com/N-CPUninter/Big_Data/main/data/imdb-reviews-pt-br.zip) (o mesmo arquivo usado pelo notebook do Colab; também disponível na plataforma). Extraia o ZIP e copie o `imdb-reviews-pt-br.csv` (cerca de 127 MB) para a pasta `data\\` do projeto no seu computador, por exemplo `C:\\bigdata-lab\\data\\`. Ele aparece dentro da sandbox em `/home/maria_dev/data-host/`.", "trab"),
   Num("Envie o arquivo ao HDFS pelo Ambari, como nos vídeos: abra [http://localhost:8080](http://localhost:8080), entre com `maria_dev` / `maria_dev`, clique no menu de nove pontos no canto superior direito e escolha **Files View**. Navegue até `user` > `maria_dev`, clique em **Upload**, selecione o CSV em `data-host` e confirme. O equivalente por comando, no terminal da sandbox, é `hdfs dfs -put ~/data-host/imdb-reviews-pt-br.csv /user/maria_dev/`.", "trab"),
@@ -339,7 +362,7 @@ const mem = [
     ["7", "8a + Oozie", "5,5 GB"],
   ], [2, 4.5, 2]),
   H2("7.1 Perfis de memória 8g e 16g"),
-  P("Com 8 GB no computador, mantenha o perfil padrão (`8g`) e o `.wslconfig` com `memory=6GB`. Os perfis 7, 8a e 8d ficam lentos, mas funcionam; feche o navegador com muitas abas. Com 12 a 16 GB, dê 10 GB ao Docker e execute `.\\lab.ps1 mem 16g`: os serviços ganham heaps maiores e os jobs ficam mais rápidos."),
+  P("Com 8 GB no computador, mantenha o perfil padrão (`8g`) e o `.wslconfig` com `memory=6GB`. Os perfis 7, 8a e 8d ficam lentos, mas funcionam; feche o navegador com muitas abas. Com 16 GB ou mais, dê 10 GB ao Docker e execute `.\\lab.ps1 mem 16g` (ou `./lab.sh mem 16g`): os serviços ganham heaps maiores e os jobs ficam mais rápidos. O perfil `16g` é o mesmo para 16, 32 ou 64 GB de RAM; não existe um perfil maior nem é preciso ajustar mais nada."),
   ...TblS(["", "Perfil `8g`", "Perfil `16g`"], [
     ["Heap do Oozie", "384 MB", "512 MB"],
     ["Timeline Server e Timeline Reader do YARN", "Ficam parados (o `lab aula` os desliga após ligar o YARN)", "Ligados"],
@@ -348,8 +371,8 @@ const mem = [
   H2("7.2 Não deixe os serviços ligados por horas a fio"),
   P("Medição real com o perfil 7: logo após ligar, o container usa cerca de 5,4 GB; depois de um dia inteiro ligado, mesmo sem uso, chega a 7 GB (o limite), o processador fica ocupado e o Ambari para de responder. Os processos Java (Oozie, HiveServer2, Metastore) crescem lentamente com o tempo, e o cache de disco do HDFS também conta no limite do container."),
   Note("Regra prática", [
-    "Ao terminar a sessão de estudo, execute `lab aula none` (para todos os serviços e mantém o Ambari) ou `.\\lab.ps1 down` (para o container; os dados ficam nos volumes).",
-    "Se o Ambari deixar de responder (`.\\lab.ps1 status` trava), execute `docker restart sandbox-hdp`. Em cerca de três minutos tudo volta, sem perda de dados.",
+    "Ao terminar a sessão de estudo, execute `lab aula none` (para todos os serviços e mantém o Ambari) ou `.\\lab.ps1 down` / `./lab.sh down` (para o container; os dados ficam nos volumes).",
+    "Se o Ambari deixar de responder (`.\\lab.ps1 status` / `./lab.sh status` trava), execute `docker restart sandbox-hdp`. Em cerca de três minutos tudo volta, sem perda de dados.",
   ]),
   H2("7.3 Sinais de falta de memória"),
   Bullet("Um serviço fica vermelho no Ambari logo depois de ligar: veja `lab status` (coluna de memória por processo) e o log em `/var/log/<serviço>`."),
@@ -361,18 +384,19 @@ const mem = [
 const prob = [
   H1("8. Problemas comuns"),
   ...TblS(["Sintoma", "O que fazer"], [
+    ["`hdfs`, `hive`, `pig` ou `spark-submit` falham com “Connection refused”, “SafeMode” ou ficam presos", "Os serviços do perfil ainda não terminaram de subir (ou o `aula` não foi executado). Espere a mensagem `PRONTO` do `aula <perfil>`; confira com `status` e no Ambari (tudo verde)."],
     ["`.\\lab.ps1` não roda (“execução de scripts foi desabilitada”)", "Execute uma vez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` no PowerShell."],
     ["`docker: error during connect` ou “Docker Desktop is not running”", "Abra o Docker Desktop e espere o ícone ficar estável. No Windows, confira o WSL2 com `wsl --status`."],
-    ["Ambari não abre em `localhost:8080` após alguns minutos", "Veja `.\\lab.ps1 logs`. Se a porta 8080 estiver em uso por outro programa, troque-a no `docker-compose.yml` (por exemplo `\"8081:8080\"`)."],
+    ["Ambari não abre em `localhost:8080` após alguns minutos", "Veja `.\\lab.ps1 logs` (ou `./lab.sh logs`). Se a porta 8080 estiver em uso por outro programa, troque-a no `docker-compose.yml` (por exemplo `\"8081:8080\"`)."],
     ["Serviço fica vermelho no Ambari ao ligar", "Ambari > Background Operations > clique na operação e leia o `stderr`. Causas comuns: memória (capítulo 7) e disco cheio do Docker (`docker system df`; limpe com `docker system prune`)."],
     ["`lab aula` falha com “requisição falhou”", "Repita o comando: o Ambari às vezes falha no primeiro start do NameNode após um restart. Persistindo, `lab stop-all` e tente de novo."],
     ["HDFS em “safe mode”", "Aguarde um minuto. Se continuar: `sudo -u hdfs hdfs dfsadmin -safemode leave` dentro da sandbox."],
     ["`Permission denied` ao gravar no HDFS", "Você está como `root`. Use `su - maria_dev` ou o terminal web com `maria_dev`."],
     ["Esqueci a senha do `admin` do Ambari", "É `admin`. Se a trocou e perdeu: `ambari-admin-password-reset` dentro da sandbox, como root."],
     ["Spark reclama da versão do Python", "Em shells de login a variável `SPARK_MAJOR_VERSION` escolhe o Python certo. Em um shell aberto por `docker exec` sem `-l`, execute `source /etc/profile.d/spark-python.sh`."],
-    ["Mongo ou Cassandra não conectam em 127.0.0.1", "Os containers precisam estar de pé: `.\\lab.ps1 nosql`. O Cassandra leva cerca de um minuto para aceitar conexões."],
+    ["Mongo ou Cassandra não conectam em 127.0.0.1", "Os containers precisam estar de pé: `.\\lab.ps1 nosql` (ou `./lab.sh nosql`). O Cassandra leva cerca de um minuto para aceitar conexões."],
     ["Mac com chip Apple está muito lento", "Confirme “Use Rosetta for x86_64/amd64 emulation” no Docker Desktop. Prefira os perfis leves (10, 11, 12, trabalho). Para a Atividade Prática o [Colab](https://colab.research.google.com/github/N-CPUninter/Big_Data/blob/main/trabalho_big_data.ipynb) continua sendo a opção mais leve."],
-    ["Quero começar do zero", "`.\\lab.ps1 reset` apaga HDFS, bancos e os arquivos da `maria_dev`."],
+    ["Quero começar do zero", "`.\\lab.ps1 reset` (ou `./lab.sh reset`) apaga HDFS, bancos e os arquivos da `maria_dev`."],
   ], [3, 5.5]),
 ];
 
@@ -422,7 +446,7 @@ const apB = [
     ["Aula 10, SparkSQL", "script lia `customer-order.csv`, arquivo chamava `customer-orders.csv`", "arquivo renomeado para `customer-order.csv` (como na aula 11)"],
     ["Oozie `job.properties`", "espaço sobrando no fim de `queueName=default`", "removido"],
     ["Hive View “Upload Table”", "interface do Ambari", "tabelas criadas por `lab aula 8a` (ou beeline/Zeppelin)"],
-    ["Storm / MongoDB no Ambari", "Service Actions > Start", "`lab storm start` / `.\\lab.ps1 nosql`"],
+    ["Storm / MongoDB no Ambari", "Service Actions > Start", "`lab storm start` / `.\\lab.ps1 nosql` (`./lab.sh nosql`)"],
   ], [1.8, 3.3, 3.9]),
 ];
 
@@ -445,7 +469,7 @@ const apC = [
     ["Ligar serviços", "Service Actions > Start (até 60 min para tudo)", "`lab aula <perfil>` liga só os da aula (ou pelo Ambari, como no vídeo)"],
     ["Python", "2.7", "3.9 (e 3.7 para o Spark 2)"],
     ["Tempo de boot", "30 a 60 min (12 h em Apple Silicon)", "2 a 4 min"],
-    ["Onde ficam os dados", "Dentro do disco da VM", "Volumes do Docker (apagáveis com `.\\lab.ps1 reset`)"],
+    ["Onde ficam os dados", "Dentro do disco da VM", "Volumes do Docker (apagáveis com `.\\lab.ps1 reset` ou `./lab.sh reset`)"],
     ["Ambari Metrics, Ranger, Knox, Atlas, NiFi", "Presentes (pesados)", "Não instalados (não são usados nas aulas)"],
   ], [2.2, 3, 3.8]),
 ];
