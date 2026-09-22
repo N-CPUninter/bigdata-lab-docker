@@ -7,6 +7,6 @@
 | `access_log.txt` | aula 9/12 (Spark Streaming, Structured Streaming) |
 | `access_log_small.txt` | aula 9 (Flume, Kafka Connect) |
 | `movielens.sql` | dump MySQL do banco `movielens` (Sqoop/Oozie). Já carregado no MariaDB da sandbox. |
-| `imdb-reviews-pt-br.csv` | **Atividade Prática** — não vem no repositório (127 MB). Baixe pelo link do Roteiro (Kaggle `luisfredgs/imdb-ptbr` ou o zip do repositório N-CPUninter/Big_Data) e coloque aqui. |
+| `imdb-reviews-pt-br.csv` | **Atividade Prática** — não vem no repositório (127 MB). Baixe [imdb-reviews-pt-br.zip](https://raw.githubusercontent.com/N-CPUninter/Big_Data/main/data/imdb-reviews-pt-br.zip) (repositório [N-CPUninter/Big_Data](https://github.com/N-CPUninter/Big_Data)), extraia e coloque o CSV aqui. |
 
 Esta pasta aparece dentro da sandbox em `/home/maria_dev/data-host` (montagem do seu computador) e uma cópia dos dados pequenos fica em `/home/maria_dev/data` (dentro da imagem).

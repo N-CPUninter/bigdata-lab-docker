@@ -31,7 +31,7 @@ Ela é `admin`. Se mudou e perdeu: `ambari-admin-password-reset` dentro da sandb
 Os sidecars precisam estar de pé: `.\lab.ps1 nosql` (ou `docker compose --profile nosql up -d`). Cassandra leva ~1 minuto para aceitar conexões.
 
 **Mac com chip Apple está muito lento**
-Confirme "Use Rosetta for x86_64/amd64 emulation" no Docker Desktop. Prefira os perfis leves (10/11/12/trabalho) e, para o Trabalho, o Colab continua sendo a opção mais leve.
+Confirme "Use Rosetta for x86_64/amd64 emulation" no Docker Desktop. Prefira os perfis leves (10/11/12/trabalho) e, para o Trabalho, o [Colab](https://colab.research.google.com/github/N-CPUninter/Big_Data/blob/main/trabalho_big_data.ipynb) continua sendo a opção mais leve.
 
 **Quero começar do zero**
 `.\lab.ps1 reset` (apaga HDFS, bancos e o home da `maria_dev`).

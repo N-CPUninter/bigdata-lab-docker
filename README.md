@@ -30,6 +30,8 @@ Os arquivos de cada aula (já com os erros de digitação corrigidos) ficam em `
 
 Cada pasta tem um `GUIA.md` dizendo o que muda em relação ao vídeo; o resumo geral está em [aulas/ERRATA.md](aulas/ERRATA.md). O que foi validado e as limitações conhecidas (Phoenix, Pig View) estão em [docs/VALIDACAO.md](docs/VALIDACAO.md).
 
+A **Atividade Prática** pode ser feita nesta sandbox ou no [notebook do Google Colab](https://colab.research.google.com/github/N-CPUninter/Big_Data/blob/main/trabalho_big_data.ipynb) publicado no [GitHub da disciplina](https://github.com/N-CPUninter/Big_Data); a escolha é do aluno (veja `aulas/trabalho/GUIA.md`).
+
 ## Comandos do dia a dia
 
 | Comando | O que faz |

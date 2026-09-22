@@ -2,7 +2,7 @@
 const d = require("docx");
 const {
   Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell,
-  WidthType, ShadingType, BorderStyle, PageBreak, TabStopType,
+  WidthType, ShadingType, BorderStyle, PageBreak, TabStopType, ExternalHyperlink,
 } = d;
 
 const FONT = "Calibri";
@@ -17,15 +17,21 @@ const MARGIN = 1418;  // 2,5 cm
 const TEXT_W = PAGE_W - 2 * MARGIN; // 9070
 
 // ---- inline: converte "texto com `codigo` e **negrito**" em TextRuns ----
+function link(label, url, base = {}) {
+  return new ExternalHyperlink({ link: url, children: [new TextRun({ text: label, font: (label === url || /^https?:\/\//.test(label)) ? MONO : FONT, size: (label === url || /^https?:\/\//.test(label)) ? 19 : 22, color: "0563C1", underline: {}, ...base })] });
+}
 function runs(text, base = {}) {
   const out = [];
-  const re = /(`[^`]+`|\*\*[^*]+\*\*)/g;
+  // tokens: [rotulo](url) | `codigo` | **negrito** | URL solta
+  const re = /(\[[^\]]+\]\((https?:\/\/[^)\s]+)\)|`[^`]+`|\*\*[^*]+\*\*|https?:\/\/[^\s)`,;]+)/g;
   let last = 0, m;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) out.push(new TextRun({ text: text.slice(last, m.index), font: FONT, size: 22, ...base }));
     const tok = m[0];
-    if (tok.startsWith("`")) out.push(new TextRun({ text: tok.slice(1, -1), font: MONO, size: 19, shading: { type: ShadingType.CLEAR, fill: "EDEDED", color: "auto" }, ...base }));
-    else out.push(new TextRun({ text: tok.slice(2, -2), font: FONT, size: 22, bold: true, ...base }));
+    if (tok.startsWith("[")) { const mm = /^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/.exec(tok); out.push(link(mm[1], mm[2], base)); }
+    else if (tok.startsWith("`")) out.push(new TextRun({ text: tok.slice(1, -1), font: MONO, size: 19, shading: { type: ShadingType.CLEAR, fill: "EDEDED", color: "auto" }, ...base }));
+    else if (tok.startsWith("**")) out.push(new TextRun({ text: tok.slice(2, -2), font: FONT, size: 22, bold: true, ...base }));
+    else out.push(link(tok, tok, base));
     last = m.index + tok.length;
   }
   if (last < text.length) out.push(new TextRun({ text: text.slice(last), font: FONT, size: 22, ...base }));
@@ -75,7 +81,7 @@ const Num = (text, ref = "steps", level = 0) => new Paragraph({
 function Note(title, text) {
   return new Table({
     width: { size: TEXT_W, type: WidthType.DXA }, columnWidths: [TEXT_W],
-    rows: [new TableRow({ children: [new TableCell({
+    rows: [new TableRow({ cantSplit: true, children: [new TableCell({
       width: { size: TEXT_W, type: WidthType.DXA },
       shading: { type: ShadingType.CLEAR, fill: NOTE_BG, color: "auto" },
       margins: { top: 120, bottom: 120, left: 160, right: 160 },
@@ -119,4 +125,4 @@ const Spacer = (after = 120) => new Paragraph({ text: "", spacing: { after } });
 const Break = () => new Paragraph({ children: [new PageBreak()] });
 
 const TblS = (h,r,w) => [Tbl(h,r,w), Spacer(100)];
-module.exports = { TblS, d, FONT, MONO, BLUE, GREY, TEXT_W, PAGE_W, MARGIN, runs, P, H1, H1n, H2, H3, Code, Bullet, Num, Note, Tbl, Spacer, Break };
+module.exports = { TblS, link, d, FONT, MONO, BLUE, GREY, TEXT_W, PAGE_W, MARGIN, runs, P, H1, H1n, H2, H3, Code, Bullet, Num, Note, Tbl, Spacer, Break };
