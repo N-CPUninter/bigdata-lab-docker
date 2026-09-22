@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+# lab — CLI da sandbox: liga/desliga os serviços do Ambari por aula, aplica perfil de memória,
+# semeia dados e dá status. Usa a API REST do Ambari (admin/admin) em http://localhost:8080.
+set -uo pipefail
+AMB="http://localhost:8080/api/v1"
+CLUSTER="sandbox"
+CURL=(curl -sS -u admin:admin -H 'X-Requested-By: ambari')
+AULAS_MAP="/opt/lab/aulas.map"
+export JAVA_HOME="${JAVA_HOME:-$(cat /etc/java_home 2>/dev/null)}"
+export PATH="$JAVA_HOME/bin:/usr/local/bin:$PATH"
+QUIET=0
+[[ " $* " == *" --quiet "* ]] && QUIET=1
+
+log() { [ "$QUIET" = 1 ] || echo "[lab] $*"; }
+die() { echo "[lab] ERRO: $*" >&2; exit 1; }
+
+usage() {
+  cat <<'EOF'
+Uso: lab <comando>
+
+  aula <perfil>        prepara a sandbox para uma aula (para o que não é usado, liga o necessário)
+                       perfis: 7 8a 8b 8c 8d 9a 9b 9c 9d 10 11 12 trabalho none
+  status               estado dos serviços do Ambari e memória usada
+  start <SERVICO...>   liga serviços do Ambari (ex.: HDFS YARN HIVE)
+  stop <SERVICO...>    desliga serviços
+  stop-all             desliga todos os serviços do Ambari (base continua no ar)
+  mem <8g|16g>         aplica perfil de memória (heaps/containers) — exige restart dos serviços
+  seed-hdfs            (re)copia ml-100k e dados das aulas para /user/maria_dev no HDFS
+  seed-hive            cria as tabelas Hive ratings/names (substitui o Upload Table do Hive View)
+  storm <start|stop>   sobe/derruba nimbus, supervisor e UI do Storm (porta 8744)
+  jupyter <start|stop> JupyterLab com PySpark em http://localhost:8889 (token: bigdata)
+  wait-ambari          espera o Ambari responder
+  urls                 lista as URLs úteis
+EOF
+}
+
+wait_ambari() {
+  for _ in $(seq 1 180); do
+    code=$("${CURL[@]}" -o /dev/null -w '%{http_code}' "$AMB/clusters/$CLUSTER" 2>/dev/null || true)
+    [ "$code" = "200" ] && return 0
+    sleep 3
+  done
+  die "Ambari não respondeu em http://localhost:8080"
+}
+
+wait_agent() {
+  for _ in $(seq 1 120); do
+    # host_state = agente vivo (host_status pode ficar UNHEALTHY por alertas cosméticos, ex.: NTP)
+    out=$("${CURL[@]}" "$AMB/clusters/$CLUSTER/hosts?fields=Hosts/host_state" 2>/dev/null || true)
+    grep -q '"host_state" : "HEALTHY"' <<<"$out" && return 0
+    sleep 3
+  done
+  log "aviso: agente do Ambari ainda não reportou HEALTHY"
+}
+
+wait_request() {
+  local url="$1" st
+  [ -z "$url" ] && return 0
+  while :; do
+    st=$("${CURL[@]}" "$url" | python3 -c "import json,sys; r=json.load(sys.stdin)['Requests']; print(r['request_status'])" 2>/dev/null || echo PENDING)
+    case "$st" in
+      COMPLETED) return 0 ;;
+      FAILED|ABORTED|TIMEDOUT)
+        echo "[lab] requisição falhou ($st). Detalhes em http://localhost:8080 > Background Operations" >&2
+        "${CURL[@]}" "$url/tasks?fields=Tasks/role,Tasks/status,Tasks/stderr&Tasks/status=FAILED" \
+          | python3 -c "import json,sys; [print('  -', t['Tasks']['role'], ':', (t['Tasks'].get('stderr') or '')[-400:]) for t in json.load(sys.stdin)['items']]" 2>/dev/null
+        return 1 ;;
+    esac
+    sleep 5
+  done
+}
+
+svc_current() { "${CURL[@]}" "$AMB/clusters/$CLUSTER/services/$1?fields=ServiceInfo/state" 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)['ServiceInfo']['state'])" 2>/dev/null; }
+
+svc_set() { # svc_set STARTED|INSTALLED SERVICE...
+  local state="$1"; shift
+  local svc url attempt
+  for svc in "$@"; do
+    for attempt in 1 2 3 4 5 6; do
+      [ "$(svc_current "$svc")" = "$state" ] && break
+      "${CURL[@]}" -X PUT -d "{\"RequestInfo\":{\"context\":\"lab: $state $svc\"},\"Body\":{\"ServiceInfo\":{\"state\":\"$state\"}}}"         "$AMB/clusters/$CLUSTER/services/$svc" > /tmp/lab-req.out 2>/dev/null
+      url=$(python3 -c "import json; print(json.load(open('/tmp/lab-req.out')).get('href',''))" 2>/dev/null || true)
+      if [ -z "$url" ]; then sleep 10; continue; fi
+      log "$([ "$state" = STARTED ] && echo ligando || echo desligando) $svc ..."
+      wait_request "$url" || return 1
+      [ "$(svc_current "$svc")" = "$state" ] && break
+    done
+    [ "$(svc_current "$svc")" = "$state" ] || { echo "[lab] $svc não chegou a $state" >&2; return 1; }
+  done
+}
+
+all_services() {
+  "${CURL[@]}" "$AMB/clusters/$CLUSTER/services?fields=ServiceInfo/state" \
+    | python3 -c "import json,sys; [print(s['ServiceInfo']['service_name'], s['ServiceInfo']['state']) for s in json.load(sys.stdin)['items']]"
+}
+
+cmd_stop_all() {
+  local running
+  running=$(all_services | awk '$2=="STARTED"{print $1}')
+  [ -z "$running" ] && { log "nenhum serviço ligado"; return 0; }
+  # ordem: dependentes primeiro
+  for svc in ZEPPELIN OOZIE HIVE HBASE KAFKA SPARK2 SPARK3 MAPREDUCE2 YARN HDFS ZOOKEEPER; do
+    echo "$running" | grep -qx "$svc" && svc_set INSTALLED "$svc"
+  done
+  for svc in $running; do
+    case " ZEPPELIN OOZIE HIVE HBASE KAFKA SPARK2 SPARK3 MAPREDUCE2 YARN HDFS ZOOKEEPER " in *" $svc "*) ;; *) svc_set INSTALLED "$svc" ;; esac
+  done
+}
+
+# diretórios do HDFS que os serviços esperam (idempotente; roda quando o HDFS está ligado)
+prep_hdfs_dirs() {
+  su - hdfs -c "hdfs dfs -mkdir -p /spark2-history /spark3-history /apps/spark/warehouse /odp/apps/${ODP_BUILD:-1.2.4.0-108}/yarn /user/maria_dev /home/maria_dev && hdfs dfs -chown maria_dev:hadoop /home/maria_dev     && hdfs dfs -chmod 1777 /spark2-history /spark3-history && hdfs dfs -chmod 777 /apps/spark/warehouse     && hdfs dfs -chown -R yarn:hadoop /odp/apps/${ODP_BUILD:-1.2.4.0-108}/yarn     && hdfs dfs -chmod -R u+w /odp/apps/${ODP_BUILD:-1.2.4.0-108}/yarn     && hdfs dfs -mkdir -p /mr-history/tmp /mr-history/done && hdfs dfs -chown mapred:hadoop /mr-history /mr-history/tmp /mr-history/done && hdfs dfs -chgrp -R hadoop /mr-history && hdfs dfs -chmod 1777 /mr-history/tmp /mr-history/done" >/dev/null 2>&1 || true
+}
+
+# sharelib do Oozie: a ação Sqoop precisa do driver MySQL e (Oozie 5 + Hadoop 3) dos jars do MapReduce.
+# A imagem já traz tudo; se a sharelib for recriada, /opt/lab/oozie-sharelib-fix.sh repõe e o Oozie é reiniciado.
+prep_oozie_sharelib() {
+  if [ "$(/opt/lab/oozie-sharelib-fix.sh 2>/dev/null | tail -1)" = "changed" ]; then
+    log "sharelib do Oozie completada; reiniciando o Oozie"; svc_set INSTALLED OOZIE; svc_set STARTED OOZIE
+  fi
+}
+
+# Perfil 8g: os componentes de historico do YARN (Timeline Server/Reader, ~600 MB) ficam parados.
+# Perda: o YARN UI nao lista apps Tez concluidas; `yarn logs` e o JobHistory (MapReduce) continuam.
+trim_yarn_timeline() {
+  [ "$(cat /var/lib/lab-mem-profile 2>/dev/null)" = "8g" ] || return 0
+  local c url
+  for c in APP_TIMELINE_SERVER TIMELINE_READER; do
+    "${CURL[@]}" -X PUT -d "{\"RequestInfo\":{\"context\":\"lab 8g: stop $c\"},\"Body\":{\"HostRoles\":{\"state\":\"INSTALLED\"}}}"       "$AMB/clusters/$CLUSTER/hosts/$(hostname -f)/host_components/$c" > /tmp/lab-req.out 2>/dev/null
+    url=$(python3 -c "import json; print(json.load(open('/tmp/lab-req.out')).get('href',''))" 2>/dev/null || true)
+    [ -n "$url" ] && wait_request "$url" >/dev/null
+  done
+  log "perfil 8g: Timeline Server/Reader do YARN parados (economia de ~600 MB)"
+}
+
+cmd_aula() {
+  local perfil="${1:-}"; [ -z "$perfil" ] && { usage; exit 1; }
+  local line svcs desc
+  line=$(grep -E "^${perfil}[[:space:]]*\|" "$AULAS_MAP" || true)
+  [ -z "$line" ] && die "perfil '$perfil' desconhecido. Veja: lab aula --help"
+  svcs=$(echo "$line" | cut -d'|' -f2 | xargs)
+  desc=$(echo "$line" | cut -d'|' -f3 | xargs)
+  log "Aula $perfil — $desc"
+  wait_ambari; wait_agent
+  # desliga o que não faz parte do perfil
+  local running keep svc
+  running=$(all_services | awk '$2=="STARTED"{print $1}')
+  for svc in $running; do
+    case " $svcs " in *" $svc "*) ;; *) svc_set INSTALLED "$svc" ;; esac
+  done
+  [ "$svcs" = "-" ] && svcs=""
+  for svc in $svcs; do
+    svc_set STARTED "$svc" || die "falha ao ligar $svc"
+    [ "$svc" = HDFS ] && prep_hdfs_dirs
+    [ "$svc" = YARN ] && trim_yarn_timeline
+    [ "$svc" = OOZIE ] && prep_oozie_sharelib
+  done
+  case "$perfil" in 8a|8d|7) cmd_seed_hive ;; esac
+  log "pronto. Perfil '$perfil' ativo."
+  cmd_urls
+}
+
+cmd_status() {
+  wait_ambari
+  echo "Serviços do Ambari:"; all_services | sort | awk '{printf "  %-12s %s\n",$1,$2}'
+  echo; echo "Memória do container:"; free -m | awk 'NR==1||NR==2{print "  "$0}'
+  echo; echo "Processos Java (RSS MB):"; ps -eo rss,args --sort=-rss | awk '/java/ && !/awk/ {printf "  %5d MB  %s\n",$1/1024, substr($0, index($0,$2), 90)}' | head -15
+}
+
+cmd_mem() {
+  local prof="${1:-8g}"
+  local f="/opt/lab/configs-${prof}.json"
+  [ -f "$f" ] || die "perfil de memória '$prof' não existe (use 8g ou 16g)"
+  wait_ambari
+  log "aplicando perfil de memória $prof"
+  python3 /opt/lab/ambari-config.py apply-json "$f" >/dev/null || die "falha ao aplicar $f"
+  echo "$prof" > /var/lib/lab-mem-profile
+}
+
+cmd_seed_hdfs() {
+  wait_ambari
+  grep -q '^HDFS STARTED' <<<"$(all_services)" || svc_set STARTED ZOOKEEPER HDFS
+  su - hdfs -c "hdfs dfs -mkdir -p /user/maria_dev /spark2-history /spark3-history && hdfs dfs -chown maria_dev:hadoop /user/maria_dev && hdfs dfs -chmod 1777 /spark2-history /spark3-history"
+  su - maria_dev -c "hdfs dfs -test -d /user/maria_dev/ml-100k || hdfs dfs -put /home/maria_dev/data/ml-100k /user/maria_dev/ml-100k"
+  su - maria_dev -c "cd /home/maria_dev/data && hdfs dfs -put -f ml-100k/u.data ml-100k/u.item customer-orders.csv access_log.txt /user/maria_dev/ && hdfs dfs -cp -f /user/maria_dev/customer-orders.csv /user/maria_dev/customer-order.csv"
+  su - maria_dev -c "hdfs dfs -ls /user/maria_dev"
+}
+
+cmd_seed_hive() {
+  grep -q '^HIVE STARTED' <<<"$(all_services)" || { log "HIVE não está ligado; pulei seed-hive"; return 0; }
+  for _ in $(seq 1 60); do (echo > /dev/tcp/127.0.0.1/10000) >/dev/null 2>&1 && break; sleep 3; done
+  su - maria_dev -c "hdfs dfs -test -d /user/maria_dev/ml-100k" || cmd_seed_hdfs
+  su - maria_dev -c "hdfs dfs -mkdir -p /user/maria_dev/hive/ratings /user/maria_dev/hive/names && hdfs dfs -cp -f /user/maria_dev/ml-100k/u.data /user/maria_dev/hive/ratings/ && hdfs dfs -cp -f /user/maria_dev/ml-100k/u.item /user/maria_dev/hive/names/"
+  su - maria_dev -c "beeline -u 'jdbc:hive2://localhost:10000/default' -n maria_dev --silent=true -f /opt/lab/hive-seed.sql" \
+    && log "tabelas Hive ratings e names prontas (banco default)"
+}
+
+cmd_storm() {
+  local STORM_HOME=/usr/odp/current/storm-client
+  case "${1:-}" in
+    start)
+      grep -q '^ZOOKEEPER STARTED' <<<"$(all_services)" || svc_set STARTED ZOOKEEPER
+      mkdir -p /var/log/storm /hadoop/storm && chown -R maria_dev /var/log/storm /hadoop/storm
+      for d in nimbus supervisor ui; do
+        su - maria_dev -c "nohup $STORM_HOME/bin/storm $d > /var/log/storm/$d.out 2>&1 &"
+      done
+      log "Storm iniciado: UI em http://localhost:8744 (aguarde ~30 s)" ;;
+    stop) pkg="org.apache.storm"; pkill -f "$pkg.daemon" || true; log "Storm parado" ;;
+    *) die "use: lab storm start|stop" ;;
+  esac
+}
+
+cmd_jupyter() {
+  case "${1:-}" in
+    start)
+      su - maria_dev -c "nohup env SPARK_MAJOR_VERSION=3 PYSPARK_DRIVER_PYTHON=jupyter PYSPARK_DRIVER_PYTHON_OPTS='lab --ip=0.0.0.0 --port=8889 --no-browser --ServerApp.token=bigdata --notebook-dir=/home/maria_dev' /usr/odp/current/spark3-client/bin/pyspark --master 'local[*]' > /home/maria_dev/jupyter.log 2>&1 &"
+      log "JupyterLab: http://localhost:8889/?token=bigdata (kernel já vem com a SparkSession 'spark')" ;;
+    stop) pkill -u maria_dev -f jupyter || true; log "JupyterLab parado" ;;
+    *) die "use: lab jupyter start|stop" ;;
+  esac
+}
+
+cmd_urls() {
+  cat <<'EOF'
+URLs (no navegador do seu computador):
+  Ambari ............ http://localhost:8080   (admin/admin | raj_ops/raj_ops | maria_dev/maria_dev)
+  Shell web ......... http://localhost:4200   (maria_dev/maria_dev)
+  Página inicial .... http://localhost:8888
+  NameNode UI ....... http://localhost:9870    YARN ......... http://localhost:8088
+  HiveServer2 UI .... http://localhost:10002    Oozie ........ http://localhost:11000/oozie
+  HBase Master ...... http://localhost:16010    Zeppelin ..... http://localhost:9995
+  Spark2 History .... http://localhost:18081    Storm UI ..... http://localhost:8744
+  Flink ............. http://localhost:8082     Drill ........ http://localhost:8756    Presto ... http://localhost:8090
+SSH: ssh -p 2222 maria_dev@localhost   (senha maria_dev)
+EOF
+}
+
+case "${1:-}" in
+  aula)        shift; [ "${1:-}" = "--help" ] && { cat "$AULAS_MAP"; exit 0; }; cmd_aula "$@" ;;
+  status)      cmd_status ;;
+  start)       shift; wait_ambari; svc_set STARTED $(printf '%s
+' "$@" | grep -v '^--') ;;
+  stop)        shift; wait_ambari; svc_set INSTALLED $(printf '%s
+' "$@" | grep -v '^--') ;;
+  stop-all)    wait_ambari; cmd_stop_all ;;
+  mem)         shift; cmd_mem "$@" ;;
+  seed-hdfs)   cmd_seed_hdfs ;;
+  seed-hive)   wait_ambari; cmd_seed_hive ;;
+  storm)       shift; cmd_storm "$@" ;;
+  jupyter)     shift; cmd_jupyter "$@" ;;
+  wait-ambari) wait_ambari; wait_agent ;;
+  urls)        cmd_urls ;;
+  *)           usage; exit 1 ;;
+esac

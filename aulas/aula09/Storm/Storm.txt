@@ -1,0 +1,48 @@
+What is Storm?
+ - Another framework for processing continuous streams of data on a cluster
+   - Can run on top of YARN (like Spark)
+ - Works on individual events, not micro-batches (like Spark Streaming does)
+   - If you need sub-second latency, Storm is for you
+
+Storm terminology
+ - A stream consists of tuples that flow through... (tuples are list of information)
+ - Sprouts that are sources of stream data (Kafka, Twitter, database conection, tcp, etc.)
+ - Bolts that process stream data as its received
+   - Transform, aggregate, write to databases / HDFS
+ - A topology is a graph of sprouts and bolts that process your stream
+
+Developing Storm applications
+ - Usually done with Java
+   - Although bolts may be directed through scripts in other languages
+ - Storm Core
+   - The lower-level API for Storm
+   - "At-least-once" semantics (pode receber dados duplicados)
+ - Trident
+   - Higher-level API for Storm
+   - "Exactly-once" semantics (garante a entrega)
+ - Storm runs your application "forever" once submitted - until you explicitly stop them
+
+Storm vs. Spark Streaming
+
+ - There's something to be said for having the rest of Spark at your disposal
+ - But if you need truly real-time processing (sub-second) of events as they come in, Storm's your choice
+ - Core Storm offers "tumbling windows" (no overlaping events) in adition to "sliding windows" (may have overlaping events)
+ - Kafka + Storm seems to be pretty popular combination
+
+
+Exemplo com Storm: WordCount (a buit-in sample)
+
+Ambari > Storm > Service Actions > Start
+Ambari > Kafka > Service Actions > Start
+cd /usr/hdp/current/storm-client/
+cd contrib/storm-starter/src/jvm/org/apache/storm/starter
+vi WordCountTopology.java
+
+storm jar /usr/hdp/current/storm-client/contrib/storm-starter/storm-starter-topologies-*.jar org.apache.storm.starter.WordCountTopology wordcount
+# inclui todos os arquivos .jar que serão necessários
+# e inicia o WordCountTopology
+
+É possível ver o progresso da execução na interface web do storm em 127.0.0.1:8744
+
+cd /usr/hdp/current/storm-client/logs/workerss-artifacts
+# É posssível ver os resutlados da execução

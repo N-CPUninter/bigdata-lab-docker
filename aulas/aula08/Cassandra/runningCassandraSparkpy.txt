@@ -1,0 +1,7 @@
+export SPARK_MAJOR_VERSION=2
+spark-submit --packages datastax:spark-cassandra-connector:2.0.0-M2-s_2.11 CassandraSpark.py
+
+# Verifica que a tabela foi criada com os dados corretos
+cqlsh --cqlversion="3.4.0"
+USE movielens;
+SELECT * FROM users LIMIT 10;

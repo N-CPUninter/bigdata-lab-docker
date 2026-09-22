@@ -1,0 +1,71 @@
+{
+  "hadoop-env": {
+    "namenode_heapsize": "512m",
+    "dtnode_heapsize": "384m",
+    "hadoop_heapsize": "512"
+  },
+  "yarn-env": {
+    "resourcemanager_heapsize": "512",
+    "nodemanager_heapsize": "512",
+    "yarn_heapsize": "512",
+    "apptimelineserver_heapsize": "512"
+  },
+  "yarn-hbase-env": {
+    "yarn_hbase_master_heapsize": "512m",
+    "yarn_hbase_regionserver_heapsize": "512m"
+  },
+  "yarn-site": {
+    "yarn.nodemanager.resource.memory-mb": "3072",
+    "yarn.scheduler.maximum-allocation-mb": "3072",
+    "yarn.scheduler.minimum-allocation-mb": "256"
+  },
+  "mapred-site": {
+    "mapreduce.map.memory.mb": "768",
+    "mapreduce.map.java.opts": "-Xmx614m",
+    "mapreduce.reduce.memory.mb": "1024",
+    "mapreduce.reduce.java.opts": "-Xmx819m",
+    "yarn.app.mapreduce.am.resource.mb": "768",
+    "yarn.app.mapreduce.am.command-opts": "-Xmx614m -Dodp.version=${odp.version}"
+  },
+  "mapred-env": {
+    "jobhistory_heapsize": "384"
+  },
+  "tez-site": {
+    "tez.am.resource.memory.mb": "768",
+    "tez.am.java.opts": "-server -Xmx614m -Djava.net.preferIPv4Stack=true",
+    "tez.task.resource.memory.mb": "768"
+  },
+  "hive-env": {
+    "hive.heapsize": "512",
+    "hive.metastore.heapsize": "512",
+    "webhcat_heapsize": "256"
+  },
+  "hive-site": {
+    "hive.tez.container.size": "768",
+    "hive.tez.java.opts": "-server -Xmx614m -Djava.net.preferIPv4Stack=true"
+  },
+  "hbase-env": {
+    "hbase_master_heapsize": "512m",
+    "hbase_regionserver_heapsize": "768m"
+  },
+  "zookeeper-env": {
+    "zk_server_heapsize": "256"
+  },
+  "oozie-env": {
+    "oozie_heapsize": "384m"
+  },
+  "spark2-env": {
+    "spark_daemon_memory": "512"
+  },
+  "spark2-defaults": {
+    "spark.driver.memory": "1g",
+    "spark.executor.memory": "1g",
+    "spark.master": "local[*]"
+  },
+  "oozie-site": {
+    "oozie.launcher.default.memory.mb": "512"
+  },
+  "capacity-scheduler": {
+    "yarn.scheduler.capacity.maximum-am-resource-percent": "0.8"
+  }
+}

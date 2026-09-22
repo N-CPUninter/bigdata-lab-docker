@@ -1,0 +1,380 @@
+{
+  "Blueprints": {
+    "blueprint_name": "sandbox",
+    "stack_name": "ODP",
+    "stack_version": "1.2"
+  },
+  "host_groups": [
+    {
+      "name": "host_group_0",
+      "cardinality": "1",
+      "components": [
+        {
+          "name": "ZOOKEEPER_SERVER"
+        },
+        {
+          "name": "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name": "NAMENODE"
+        },
+        {
+          "name": "SECONDARY_NAMENODE"
+        },
+        {
+          "name": "DATANODE"
+        },
+        {
+          "name": "HDFS_CLIENT"
+        },
+        {
+          "name": "RESOURCEMANAGER"
+        },
+        {
+          "name": "NODEMANAGER"
+        },
+        {
+          "name": "APP_TIMELINE_SERVER"
+        },
+        {
+          "name": "TIMELINE_READER"
+        },
+        {
+          "name": "YARN_REGISTRY_DNS"
+        },
+        {
+          "name": "YARN_CLIENT"
+        },
+        {
+          "name": "HISTORYSERVER"
+        },
+        {
+          "name": "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name": "TEZ_CLIENT"
+        },
+        {
+          "name": "HIVE_METASTORE"
+        },
+        {
+          "name": "HIVE_SERVER"
+        },
+        {
+          "name": "HIVE_CLIENT"
+        },
+        {
+          "name": "HBASE_MASTER"
+        },
+        {
+          "name": "HBASE_REGIONSERVER"
+        },
+        {
+          "name": "HBASE_CLIENT"
+        },
+        {
+          "name": "PHOENIX_QUERY_SERVER"
+        },
+        {
+          "name": "KAFKA_BROKER"
+        },
+        {
+          "name": "OOZIE_SERVER"
+        },
+        {
+          "name": "OOZIE_CLIENT"
+        },
+        {
+          "name": "SQOOP"
+        },
+        {
+          "name": "SPARK2_CLIENT"
+        },
+        {
+          "name": "SPARK2_JOBHISTORYSERVER"
+        },
+        {
+          "name": "ZEPPELIN_MASTER"
+        }
+      ]
+    }
+  ],
+  "configurations": [
+    {
+      "hdfs-site": {
+        "properties": {
+          "dfs.replication": "1",
+          "dfs.namenode.name.dir": "/hadoop/hdfs/namenode",
+          "dfs.datanode.data.dir": "/hadoop/hdfs/data",
+          "dfs.namenode.checkpoint.dir": "/hadoop/hdfs/namesecondary",
+          "dfs.datanode.failed.volumes.tolerated": "0",
+          "dfs.namenode.safemode.threshold-pct": "0.99",
+          "dfs.datanode.du.reserved": "1073741824"
+        }
+      }
+    },
+    {
+      "hadoop-env": {
+        "properties": {
+          "namenode_heapsize": "512m",
+          "dtnode_heapsize": "384m",
+          "hadoop_heapsize": "512",
+          "nfsgateway_heapsize": "256"
+        }
+      }
+    },
+    {
+      "yarn-site": {
+        "properties": {
+          "yarn.nodemanager.resource.memory-mb": "3072",
+          "yarn.nodemanager.resource.cpu-vcores": "4",
+          "yarn.scheduler.minimum-allocation-mb": "256",
+          "yarn.scheduler.maximum-allocation-mb": "3072",
+          "yarn.nodemanager.vmem-check-enabled": "false",
+          "yarn.nodemanager.pmem-check-enabled": "false",
+          "yarn.nodemanager.local-dirs": "/hadoop/yarn/local",
+          "yarn.nodemanager.log-dirs": "/hadoop/yarn/log",
+          "hadoop.registry.dns.bind-port": "5300",
+          "odp.version": "1.2.4.0-108"
+        }
+      }
+    },
+    {
+      "yarn-env": {
+        "properties": {
+          "resourcemanager_heapsize": "512",
+          "nodemanager_heapsize": "512",
+          "yarn_heapsize": "512",
+          "apptimelineserver_heapsize": "512",
+          "registry.dns.bind-port": "5300"
+        }
+      }
+    },
+    {
+      "yarn-hbase-env": {
+        "properties": {
+          "yarn_hbase_master_heapsize": "512m",
+          "yarn_hbase_regionserver_heapsize": "512m",
+          "yarn_hbase_heapsize": "512m"
+        }
+      }
+    },
+    {
+      "mapred-site": {
+        "properties": {
+          "mapreduce.map.memory.mb": "768",
+          "mapreduce.map.java.opts": "-Xmx614m",
+          "mapreduce.reduce.memory.mb": "1024",
+          "mapreduce.reduce.java.opts": "-Xmx819m",
+          "yarn.app.mapreduce.am.resource.mb": "768",
+          "yarn.app.mapreduce.am.command-opts": "-Xmx614m -Dodp.version=${odp.version}",
+          "mapreduce.task.io.sort.mb": "128",
+          "odp.version": "1.2.4.0-108"
+        }
+      }
+    },
+    {
+      "mapred-env": {
+        "properties": {
+          "jobhistory_heapsize": "384"
+        }
+      }
+    },
+    {
+      "tez-site": {
+        "properties": {
+          "tez.am.resource.memory.mb": "768",
+          "tez.am.java.opts": "-server -Xmx614m -Djava.net.preferIPv4Stack=true",
+          "tez.task.resource.memory.mb": "768",
+          "tez.runtime.io.sort.mb": "128",
+          "tez.runtime.unordered.output.buffer.size-mb": "64"
+        }
+      }
+    },
+    {
+      "hive-env": {
+        "properties": {
+          "hive_database_type": "mysql",
+          "hive_database": "Existing MySQL / MariaDB Database",
+          "hive_database_name": "hive",
+          "hive_ambari_database": "MySQL",
+          "hive.heapsize": "512",
+          "hive.metastore.heapsize": "512",
+          "hive_security_authorization": "None"
+        }
+      }
+    },
+    {
+      "hive-site": {
+        "properties": {
+          "javax.jdo.option.ConnectionURL": "jdbc:mysql://localhost/hive?createDatabaseIfNotExist=true",
+          "javax.jdo.option.ConnectionDriverName": "com.mysql.jdbc.Driver",
+          "javax.jdo.option.ConnectionUserName": "hive",
+          "javax.jdo.option.ConnectionPassword": "hive",
+          "hive.metastore.uris": "thrift://%HOSTGROUP::host_group_0%:9083",
+          "hive.tez.container.size": "768",
+          "hive.tez.java.opts": "-server -Xmx614m -Djava.net.preferIPv4Stack=true",
+          "hive.auto.convert.join.noconditionaltask.size": "104857600",
+          "hive.server2.enable.doAs": "true",
+          "hive.exec.post.hooks": "org.apache.hadoop.hive.ql.hooks.HiveProtoLoggingHook",
+          "hive.security.authorization.enabled": "false",
+          "hive.server2.tez.initialize.default.sessions": "false",
+          "hive.metastore.warehouse.dir": "/apps/hive/warehouse",
+          "hive.metastore.warehouse.external.dir": "/apps/hive/warehouse",
+          "hive.strict.managed.tables": "false",
+          "hive.create.as.insert.only": "false",
+          "metastore.create.as.acid": "false"
+        }
+      }
+    },
+    {
+      "hiveserver2-site": {
+        "properties": {
+          "hive.security.authorization.enabled": "false"
+        }
+      }
+    },
+    {
+      "hbase-env": {
+        "properties": {
+          "hbase_master_heapsize": "512m",
+          "hbase_regionserver_heapsize": "768m",
+          "phoenix_sql_enabled": "true"
+        }
+      }
+    },
+    {
+      "hbase-site": {
+        "properties": {
+          "hbase.rootdir": "hdfs://%HOSTGROUP::host_group_0%:8020/apps/hbase/data",
+          "hbase.regionserver.global.memstore.size": "0.3",
+          "hfile.block.cache.size": "0.3",
+          "hbase.security.authorization": "false",
+          "hbase.coprocessor.master.classes": "",
+          "hbase.coprocessor.region.classes": "org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint",
+          "hbase.coprocessor.regionserver.classes": ""
+        }
+      }
+    },
+    {
+      "kafka-broker": {
+        "properties": {
+          "listeners": "PLAINTEXT://localhost:6667",
+          "port": "6667",
+          "log.dirs": "/kafka-logs",
+          "zookeeper.connect": "%HOSTGROUP::host_group_0%:2181",
+          "offsets.topic.replication.factor": "1",
+          "transaction.state.log.replication.factor": "1",
+          "transaction.state.log.min.isr": "1",
+          "auto.create.topics.enable": "true",
+          "num.partitions": "1",
+          "kafka.metrics.reporters": "",
+          "kafka.timeline.metrics.reporter.enabled": "false",
+          "kafka.ganglia.metrics.reporter.enabled": "false"
+        }
+      }
+    },
+    {
+      "zookeeper-env": {
+        "properties": {
+          "zk_server_heapsize": "256",
+          "zk_data_dir": "/hadoop/zookeeper"
+        }
+      }
+    },
+    {
+      "zoo.cfg": {
+        "properties": {
+          "admin.enableServer": "false"
+        }
+      }
+    },
+    {
+      "oozie-env": {
+        "properties": {
+          "oozie_database": "Existing MySQL / MariaDB Database",
+          "oozie_heapsize": "384m",
+          "oozie_data_dir": "/hadoop/oozie/data",
+          "oozie_admin_users": "{oozie_user}, oozie-admin, maria_dev, raj_ops, admin"
+        }
+      }
+    },
+    {
+      "oozie-site": {
+        "properties": {
+          "oozie.service.JPAService.jdbc.driver": "com.mysql.jdbc.Driver",
+          "oozie.service.JPAService.jdbc.url": "jdbc:mysql://localhost/oozie",
+          "oozie.service.JPAService.jdbc.username": "oozie",
+          "oozie.service.JPAService.jdbc.password": "oozie",
+          "oozie.db.schema.name": "oozie",
+          "oozie.base.url": "http://%HOSTGROUP::host_group_0%:11000/oozie",
+          "oozie.service.ProxyUserService.proxyuser.maria_dev.hosts": "*",
+          "oozie.service.ProxyUserService.proxyuser.maria_dev.groups": "*",
+          "oozie.service.ProxyUserService.proxyuser.hive.hosts": "*",
+          "oozie.service.ProxyUserService.proxyuser.hive.groups": "*",
+          "oozie.launcher.default.memory.mb": "512",
+          "oozie.launcher.default.vcores": "1"
+        }
+      }
+    },
+    {
+      "core-site": {
+        "properties": {
+          "hadoop.proxyuser.hive.hosts": "*",
+          "hadoop.proxyuser.hive.groups": "*",
+          "hadoop.proxyuser.oozie.hosts": "*",
+          "hadoop.proxyuser.oozie.groups": "*",
+          "hadoop.proxyuser.hcat.hosts": "*",
+          "hadoop.proxyuser.hcat.groups": "*",
+          "hadoop.proxyuser.root.hosts": "*",
+          "hadoop.proxyuser.root.groups": "*",
+          "hadoop.proxyuser.admin.hosts": "*",
+          "hadoop.proxyuser.admin.groups": "*",
+          "hadoop.proxyuser.maria_dev.hosts": "*",
+          "hadoop.proxyuser.maria_dev.groups": "*",
+          "hadoop.proxyuser.raj_ops.hosts": "*",
+          "hadoop.proxyuser.raj_ops.groups": "*",
+          "hadoop.proxyuser.zeppelin.hosts": "*",
+          "hadoop.proxyuser.zeppelin.groups": "*",
+          "hadoop.proxyuser.spark.hosts": "*",
+          "hadoop.proxyuser.spark.groups": "*",
+          "hadoop.proxyuser.ambari.hosts": "*",
+          "hadoop.proxyuser.ambari.groups": "*"
+        }
+      }
+    },
+    {
+      "spark2-env": {
+        "properties": {
+          "spark_daemon_memory": "512"
+        }
+      }
+    },
+    {
+      "spark2-defaults": {
+        "properties": {
+          "spark.driver.memory": "1g",
+          "spark.executor.memory": "1g",
+          "spark.master": "local[*]"
+        }
+      }
+    },
+    {
+      "cluster-env": {
+        "properties": {
+          "smokeuser": "ambari-qa",
+          "user_group": "hadoop",
+          "ignore_groupsusers_create": "false",
+          "recovery_enabled": "false"
+        }
+      }
+    },
+    {
+      "capacity-scheduler": {
+        "properties": {
+          "yarn.scheduler.capacity.maximum-am-resource-percent": "0.8"
+        }
+      }
+    }
+  ]
+}

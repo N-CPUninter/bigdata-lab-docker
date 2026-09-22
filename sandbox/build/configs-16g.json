@@ -1,0 +1,71 @@
+{
+  "hadoop-env": {
+    "namenode_heapsize": "1024m",
+    "dtnode_heapsize": "768m",
+    "hadoop_heapsize": "1024"
+  },
+  "yarn-env": {
+    "resourcemanager_heapsize": "1024",
+    "nodemanager_heapsize": "1024",
+    "yarn_heapsize": "1024",
+    "apptimelineserver_heapsize": "1024"
+  },
+  "yarn-hbase-env": {
+    "yarn_hbase_master_heapsize": "1024m",
+    "yarn_hbase_regionserver_heapsize": "1024m"
+  },
+  "yarn-site": {
+    "yarn.nodemanager.resource.memory-mb": "6144",
+    "yarn.scheduler.maximum-allocation-mb": "6144",
+    "yarn.scheduler.minimum-allocation-mb": "512"
+  },
+  "mapred-site": {
+    "mapreduce.map.memory.mb": "1024",
+    "mapreduce.map.java.opts": "-Xmx819m",
+    "mapreduce.reduce.memory.mb": "2048",
+    "mapreduce.reduce.java.opts": "-Xmx1638m",
+    "yarn.app.mapreduce.am.resource.mb": "1024",
+    "yarn.app.mapreduce.am.command-opts": "-Xmx819m -Dodp.version=${odp.version}"
+  },
+  "mapred-env": {
+    "jobhistory_heapsize": "768"
+  },
+  "tez-site": {
+    "tez.am.resource.memory.mb": "1024",
+    "tez.am.java.opts": "-server -Xmx819m -Djava.net.preferIPv4Stack=true",
+    "tez.task.resource.memory.mb": "1024"
+  },
+  "hive-env": {
+    "hive.heapsize": "1024",
+    "hive.metastore.heapsize": "1024",
+    "webhcat_heapsize": "512"
+  },
+  "hive-site": {
+    "hive.tez.container.size": "1024",
+    "hive.tez.java.opts": "-server -Xmx819m -Djava.net.preferIPv4Stack=true"
+  },
+  "hbase-env": {
+    "hbase_master_heapsize": "1024m",
+    "hbase_regionserver_heapsize": "1536m"
+  },
+  "zookeeper-env": {
+    "zk_server_heapsize": "512"
+  },
+  "oozie-env": {
+    "oozie_heapsize": "512m"
+  },
+  "spark2-env": {
+    "spark_daemon_memory": "1024"
+  },
+  "spark2-defaults": {
+    "spark.driver.memory": "2g",
+    "spark.executor.memory": "2g",
+    "spark.master": "local[*]"
+  },
+  "oozie-site": {
+    "oozie.launcher.default.memory.mb": "1024"
+  },
+  "capacity-scheduler": {
+    "yarn.scheduler.capacity.maximum-am-resource-percent": "0.8"
+  }
+}

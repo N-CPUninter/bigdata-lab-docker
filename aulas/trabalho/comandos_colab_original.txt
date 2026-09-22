@@ -1,0 +1,47 @@
+# Comandos para realização do trabalho da matéria de Big Data com uso da biblioteca PySpark.
+
+**Observação importante: Trabalho realizado com uso da biblioteca pandas não será aceito!**
+## Upload do arquivo `imdb-reviews-pt-br.csv` para dentro do Google Colab
+!wget https://raw.githubusercontent.com/N-CPUninter/Big_Data/main/data/imdb-reviews-pt-br.zip -O imdb-reviews-pt-br.zip
+!unzip imdb-reviews-pt-br.zip
+!rm imdb-reviews-pt-br.zip
+## Instalação manual das dependências para uso do pyspark no Google Colab
+!pip install pyspark
+## Importar, instanciar e criar a SparkSession
+from pyspark.sql import SparkSession
+
+appName = "PySpark Trabalho de Big Data"
+master = "local"
+
+spark = SparkSession.builder.appName(appName).master(master).getOrCreate()
+## Criar spark dataframe do CSV utilizando o método rtead.csv do spark
+imdb_df = spark.read.csv('imdb-reviews-pt-br.csv', 
+                         header=True, 
+                         quote="\"", 
+                         escape="\"", 
+                         encoding="UTF-8")
+# Questão 1
+## Criar funções de MAP:
+- Criar função para mapear o "sentiment" como chave e o "id" como valor do tipo inteiro
+def map(x):
+  # Coloque aqui o seu código para retornar a tupla necessária
+## Cria funções de REDUCE:
+Criar função de reduce para somar os IDs por "sentiment".
+def reduceByKey(x,y):
+  # Coloque aqui o seu código para retornar o resultado necessário
+## Aplicação do map/reduce e visualização do resultado
+# Coloque aqui a sua linha de código para aplicar o map/reduce no seu 
+# dataframe spark e realize o collect() ao final para visualizar os dados.
+
+# Questão 2:
+## Criar funções de MAP:
+- Criar função para mapear o "sentiment" como chave e uma tupla com a soma das palavras de cada texto como valor.
+def map(x):
+  # Coloque aqui o seu código para retornar a tupla necessária
+## Cria funções de REDUCE:
+Criar função de reduce para somar o numero de palavras de cada texto português e inglês por "sentiment".
+def reduceByKey(x,y):
+  # Coloque aqui o seu código para retornar o resultado necessário
+## Aplicação do map/reduce e visualização do resultado
+# Coloque aqui a sua linha de código para aplicar o map/reduce no seu 
+# dataframe spark e realize o collect() ao final para visualizar os dados.

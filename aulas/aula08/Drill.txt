@@ -1,0 +1,62 @@
+A SQL query engine for a variety of non-relational databases and data files
+ - Hive, MongoDB, HBase
+ - Even flat JSON or Parquet files on HDFS, S3, azure, Google cloud, local file system
+Based on Google's Dremel
+
+It's real SQL
+ - Not SQL-like
+ - And it has a ODBC / JDBC driver so other tools can connect to it just like any relational database
+
+It's fast and pretty easy to set up.
+ - But remember, these are still non-relational databases under the hood!
+ - Allow SQL analysis of disparate data source without having to transform and load it first
+   - Internally data is represented as JSON and so has no fixed schema
+
+You can even do joins across different database technologies
+ - Or with flat JSON files that are just sitting around
+
+Think of it as SQL for you entire ecosystem
+
+
+Inicie o MongoDB antes (como no tema do MongoDB)
+
+Instalando Apache Drill:
+wget http://archive.apache.org/dist/drill/drill-1.12.0/apache-drill-1.12.0.tar.gz
+tar -xzf apache-drill-1.12.0.tar.gz
+cd apache-drill-1.12.0
+bin/drillbit.sh start -Ddrill.exec.port=8756 # sets drill to run on port 8756. This port is open and unused on HDP
+
+Acessar Drill:
+127.0.0.1:8756
+
+Configure o Drill:
+Storage > Hive > Update
+Change "hive.metastore.uris" : "" para "hive.metastore.uris" : "thrift://localhost:9083"
+Update
+# 9083 é a porta do Hive no HDP
+MongoDB funciona por padrão sem necessidade de configurar.
+
+
+Utilizando o Drill:
+
+SHOW DATABASES;
+# Exibe todas as bases de dados acessíveis pelo Drill
+
+SELECT * FROM hive.movielens.ratings LIMIT 10;
+# Retorna 10 resultados da base de filmes que está no hive
+
+SELECT * FROM mongo.movielens.users LIMIT 10;
+# Retorna 10 resultados da base de usuários que está no mongodb
+
+SELECT u.occupation, COUNT(*) FROM hive.movielens.ratings r JOIN mongo.movielens.users u ON r.user_id = u.userid GROUP BY u.occupation;
+# Retorna a quantidade de avaliações agrupadas por ocupação dos usuários
+
+
+
+
+
+Stop Drill:
+bin/drillbit.sh stop
+
+Stop MongoDB:
+Via Ambari

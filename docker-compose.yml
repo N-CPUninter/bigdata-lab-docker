@@ -1,0 +1,110 @@
+# Sandbox Big Data (UNINTER) — substituto da VM HDP 2.6.5
+# Uso básico:   docker compose up -d          (sobe a sandbox)
+#               .\lab.ps1 aula 7             (liga só os serviços da aula 7)
+# NoSQL:        docker compose --profile nosql up -d   (Mongo + Cassandra para a aula 8c/8d)
+name: bigdata-lab
+
+services:
+  sandbox:
+    image: ${IMAGE:-ghcr.io/n-cpuninter/bigdata-sandbox}:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: sandbox/Dockerfile
+      extra_hosts:
+        - "sandbox.hortonworks.com:127.0.0.1"
+    container_name: sandbox-hdp
+    hostname: sandbox.hortonworks.com
+    platform: linux/amd64
+    environment:
+      LAB_MEM: ${LAB_MEM:-8g}
+      LAB_AULA: ${LAB_AULA:-}
+    ports:
+      - "8080:8080"    # Ambari
+      - "8888:8888"    # página inicial (splash)
+      - "4200:4200"    # shell web
+      - "2222:22"      # ssh maria_dev@localhost -p 2222
+      - "8020:8020"    # HDFS NameNode RPC
+      - "9870:50070"   # HDFS NameNode UI (50070 dentro; no host 9870 — o Windows reserva 50000-50959)
+      - "8050:8050"    # YARN ResourceManager RPC
+      - "8088:8088"    # YARN UI
+      - "19888:19888"  # MapReduce History
+      - "10000:10000"  # HiveServer2 (beeline / JDBC)
+      - "10002:10002"  # HiveServer2 UI
+      - "9083:9083"    # Hive Metastore (Drill/Presto)
+      - "11000:11000"  # Oozie
+      - "16010:16010"  # HBase Master UI
+      - "8765:8765"    # Phoenix Query Server
+      - "2181:2181"    # ZooKeeper
+      - "6667:6667"    # Kafka
+      - "9995:9995"    # Zeppelin
+      - "18081:18081"  # Spark2 History
+      - "18082:18082"  # Spark3 History
+      - "4040:4040"    # Spark UI (job em execução)
+      - "8744:8744"    # Storm UI
+      - "8082:8082"    # Flink UI
+      - "9000:9000"    # Flink socket (nc -l 9000)
+      - "8756:8756"    # Drill UI
+      - "8090:8090"    # Presto UI
+      - "44444:44444"  # Flume netcat
+      - "27017:27017"  # MongoDB (sidecar compartilha a rede)
+      - "9042:9042"    # Cassandra (sidecar compartilha a rede)
+      - "8889:8889"    # JupyterLab (opcional: lab jupyter)
+    volumes:
+      - hadoop:/hadoop
+      - mysql:/var/lib/mysql
+      - pgsql:/var/lib/pgsql/data
+      - home:/home/maria_dev
+      - ./aulas:/home/maria_dev/aulas
+      - ./data:/home/maria_dev/data-host
+    shm_size: 512m
+    # sem `ulimits` explícitos: o Ambari configura limites (nofile 128000) via pam_limits e um hard limit
+    # menor faria `su hdfs` falhar com "cannot open session"; os padrões do Docker (1048576/ilimitado) bastam.
+    mem_limit: ${SANDBOX_MEM_LIMIT:-7g}
+    stop_grace_period: 2m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -u admin:admin http://localhost:8080/api/v1/clusters >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 40
+      start_period: 3m
+
+  # Sidecars NoSQL (Aulas 8c/8d): compartilham o namespace de rede da sandbox,
+  # logo respondem em 127.0.0.1 como nos roteiros (mongodb://127.0.0.1, cassandra 127.0.0.1).
+  mongo:
+    image: mongo:4.4
+    container_name: sandbox-mongo
+    profiles: ["nosql"]
+    network_mode: "service:sandbox"
+    command: ["mongod", "--wiredTigerCacheSizeGB", "0.25", "--bind_ip", "127.0.0.1"]
+    volumes:
+      - mongo:/data/db
+    mem_limit: 512m
+    depends_on: [sandbox]
+
+  cassandra:
+    image: cassandra:3.11
+    container_name: sandbox-cassandra
+    profiles: ["nosql"]
+    network_mode: "service:sandbox"
+    environment:
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 100M
+      JVM_OPTS: "-XX:MaxDirectMemorySize=256M"
+      CASSANDRA_LISTEN_ADDRESS: 127.0.0.1
+      CASSANDRA_RPC_ADDRESS: 127.0.0.1
+      CASSANDRA_BROADCAST_ADDRESS: 127.0.0.1
+      CASSANDRA_SEEDS: 127.0.0.1
+      CASSANDRA_CLUSTER_NAME: movielens
+    volumes:
+      - cassandra:/var/lib/cassandra
+    mem_limit: 1536m   # Cassandra 3.11 com heap 512 MB precisa de ~1,2 GB de RSS; 1 GB acaba em OOM (exit 137)
+    depends_on: [sandbox]
+
+volumes:
+  hadoop:
+  mysql:
+  pgsql:
+  home:
+  mongo:
+  cassandra:

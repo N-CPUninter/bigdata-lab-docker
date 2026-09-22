@@ -1,0 +1,7 @@
+# dados grandes / gerados
+data/imdb-reviews-pt-br.csv
+data/*.zip
+.env
+*.log
+sandbox/build/downloads/
+tests/out/

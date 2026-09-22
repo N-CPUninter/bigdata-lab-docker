@@ -1,0 +1,147 @@
+Why Spark Streaming?
+ - "Big data" never stops"
+ - Analyse data streams in real time, instead of in huge batch jobs daily
+ - Analyse streams of web log data to react to user behaviour
+ - Analyse streams of real-time sensor data for "Internet of Things" stuff
+
+Spark Streaming: High Level
+ - Data Streams
+ - Batches of data (its not really real-time)
+ - For a given time increment
+ - Transform & output to other systems
+
+This work can be distributed
+ - Processing of RDD's can happen in parallel on different worker nodes
+
+DStreams (Discretized Streams)
+ - Generates the RDDs for each time step, and can produce output at each time step.
+ - Can be transformed and acted on in much the same way as RDD's
+ - Or you can access their underlying RDD's if you need them
+
+Common stateless transformations on DStreams
+ - Map
+ - Flatmap
+ - filter
+ - reduceByKey
+
+Stateful data
+ - You can also maintain a long-lived state on a DStream
+ - For example - running totals, broken down by keys
+ - Another example: aggregating session data in web activity
+
+Windowed Transformations
+ - Allow you to compute results across a longer time period than your batch interval
+ - Example: top-sellers from the past hour
+   - You might process data every one secont (the batch interval)
+   - But maintaining a window of one hour
+ - The window "slides" as time goes on, to represent batches within the window interval
+
+Batch interval vs. slide interval vs. window interval
+ - The batch interval is how often data is captured into a DStream
+ - The slide interval is how often a windowed transformation is computed
+ - The window interval is how far back in tie the windowed transformation goes
+
+Example:
+ - Each batch contains one second of data (the batch interval)
+ - We set up a window interval of 3 seconds and a slide interval of 2 seconds
+
+Windowed transformations: code
+ - The batch interval is set up with your SparkContext:
+ssd = StreamingContext(sc,1)
+ - You can user reduceByWindow() or reduceByKeyAndWindow() to aggregate data across a longer period of time!
+hashtagCounts - hashtagKeyValues.reduceByKeyAndWindow(lambda x, y: x + y, lambda x, y : x - y, 300, 1)
+
+What is Structures Streaming?
+ - A new, higher-level API for streaming structured data
+   - Available in Spark 2.0 and 2.1 as an experimental release
+   - But it's the future
+ - Uses DataSets
+   - Like a DataFrame, but with more explicit type information
+   - a DataFrame is really a DataSet[Row]
+
+Imagine a DataFrame that never ends
+ - New data just keeps gettine appended to it
+ - Your continuous applications keeps querying updated data as it comes in
+
+Advantages of Structures Streaming
+ - Streaming code looks a lot like the equivalent non-streaming code
+ - Structures data allow Spark to represent data more efficiently
+ - SQL-style queries allow for query optimization opportunities - and even better performance
+ - Interoperability with other Spark components based on DataSets
+   - MLLib is also moving toward DataSets as its primary API
+ - DataSets in general is the direction Spark is moving
+
+Once you have a SparkSession, you can stream data, query it, and write out the results
+ - 2 lines of code to stream in structured JSON log data, count uup "action" for each hour, and write the results to a database.
+var inputDF = spark.readStream.json("s3://logs")
+inputDF.groupBy($"action", window($"time","1 hour")).count().writeStream.format("jdbc").start("jdbc:myqsl//...")
+
+
+
+Spark Streaming with Flume:
+ - We'll set up Flume to use a spooldir source as before
+ - But use an Avro sink to connect it to our Spark Streaming job!
+   - Use a window to aggregate how often each unique URL appears from our access log.
+ - Using Avro in this manner is a "push" mechanism to Spark Streaming
+   - You can also "pull" data by using a custom sink for Spark Streaming
+
+Conta quantas vezes cada URL aparece em um log
+ - Usa o sparkstreamingflume.conf para configurar o flume com sink Avro
+ - Usa o SparkFlume.py para processar o log vindo do flume
+ - mkdir checkpoint
+ - export SPARK_MAJOR_VERSION=2
+ - spark-submit --packages org.apache.spark:spark-streaming-flume_2.11:2.0.0 SparkFlume.py
+ - Em uma nova janela, vamos iniciar o Flume:
+ - cd /usr/hdp/current/flume-server/
+ - bin/flume-ng agent --conf conf --conf-file ~/sparkstreamingflume.conf --name a1
+ - Em uma terceira janela, vamos colocar um arquivo de log (access_log.txt) para ser lido pelo Flume:
+ - cp access_log.txt spool/log.txt
+ - No terminal executando o Spark, vemos a contagem de quantas vezes cada URL apareceu no log.
+ - Copiando o arquivo mais uma vez vemos que a contagem dobra
+ - cp access_log.txt spool/log2.txt
+
+Podemos usar o mesmo exemplo com poucas modificações para contar quantas vezes um status foi retornado no log de acesso.
+ - As modificações estão no arquivo SparkFlume2.py
+
+==================================================
+
+Spark Streaming
+ - Analyses continual streams of data
+   - Common example: processing log data from a website or server
+ - Data is aggregated and analysed at some given interval
+ - Can take fed to some port, Amazon Kinesis, HDFS, Kafka, Flume, and others
+ - "Checkpointing" stores state to disk periodically for fault tolerance
+
+ - A "DStream" object breaks up the stream into distinct RDD's
+ - Simple word count example:
+
+scc = StreamingContext(sc,1)
+lines = scc.textFileStream("books")
+counts = lines.flatMap(lambda line: line.split(" ")).map(lambda x: (x,1).reduceByKey(lambda a, b: a+b)
+counts.pprint()
+// This looks for text files dropped into the "books" directory, and counts up how often each word appears over time, updating every one second.
+// You need to kick off the job explictly
+ssc.start()
+ssc.awaitTermination()
+
+ - Remember your RDD's only contain one little chunk of incoming data
+ - "Windowed operations" can combine results from multiple batches over some sliding time window
+   - See window(), reduceByWindow(), reduceByKeyAndWindow()
+ - updateStateByKey()
+   - Lets you maintain a state across many batches as time goes on
+   - For example, running counts of some event
+   - See stateful_network_wordcount.py example in the SDK
+
+Structured Streaming
+ - Models streaming as a DataFrame thar just keeps expanding
+ - The new way to do it. Python support is relatively recent
+ - Streaming code ends up looking a lot like non-streaming code
+ - DataFrames provide interoperability with MLLib
+ - Let's look at an example...
+
+
+Utilizando Structures Streaming para contar a quantidade de cada status no log de acesso:
+ - Utilizando structured-streaming.py
+ - spark-submit structured-streaming.py
+
+

@@ -1,0 +1,20 @@
+# Obter importar dados do Spark
+export SPARK_MAJOR_VERSION=2
+spark-submit --packages org.mongodb.spark:mongo-spark-connector_2.11:2.0.0 MongoSpark.py
+
+# Utilizando o MongoDB shell
+$mongo
+> use movielens
+> db.users.find( {user_id: 100} )
+> db.users.explain().find( {user_id: 100} )
+> db.users.createIndex( {user_id: 1} )
+> db.users.explain().find( {user_id: 100} )
+
+# get average age for each occupation
+> db.users.aggregate( [ 
+        { $group: { _id: { occupation: "$occupation"}, avgAge: { $avg: "$age"} } }
+        ] )
+
+> db.getCollectionInfos()
+> db.users.drop()
+> exit

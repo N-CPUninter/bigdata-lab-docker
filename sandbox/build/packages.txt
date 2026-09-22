@@ -1,0 +1,33 @@
+# Pacotes instalados antes do blueprint (camada cacheável). @V@ = versão ODP com _ (ex.: 1_2_4_0_108).
+# Só pacotes base/cliente: os sub-pacotes *-namenode, *-master, *-server etc. são init-scripts
+# que exigem redhat-lsb (inexistente no EL9) e o Ambari não os usa.
+ambari-server
+ambari-agent
+odp-select
+bigtop-jsvc
+bigtop-utils
+hadoop_@V@
+hadoop_@V@-client
+hadoop_@V@-hdfs
+hadoop_@V@-libhdfs
+hadoop_@V@-yarn
+hadoop_@V@-mapreduce
+zookeeper_@V@
+tez_@V@
+hive_@V@
+hive_@V@-hcatalog
+hive_@V@-jdbc
+hbase_@V@
+phoenix_@V@
+kafka_@V@
+oozie_@V@
+oozie_@V@-client
+sqoop_@V@
+spark2_@V@
+spark2_@V@-python
+spark2_@V@-yarn-shuffle
+spark3_@V@
+spark3_@V@-python
+spark3_@V@-yarn-shuffle
+zeppelin_@V@
+hue_@V@

@@ -1,0 +1,62 @@
+Enter Kafka
+ - Kafka is a general-purpose pulish/subscribe messaging system
+ - Kafka servers store all incoming messages from publishers for some period of time, and publishes them to a stream of data called a topic
+ - Kafka consumers subscribe to one or more topics, and receive data as it's published
+ - A stream / topic can have many different consumers, all with their own position in the stream maintained
+   - Kafka is specially good at this!
+ - It's not just for Hadoop
+
+How Kafka scales
+ - Kafka itself may be distributed among many processes on many servers
+   - Will distribute the storage of stream data as well
+ - Consumers may also be distributed
+   - Consumers of the same group will have messages distributed amongst them
+   - Consumers of diffenrent groups will get their own copy of each message
+ 
+
+Iniciando o Kakfa e enviando alguns dados
+ - Preinstalado no HDP: Kafka > Service Actions > Start
+ - cd /usr/hdp/current/kafka-broker/bin
+
+Criando um tópico:
+ - ./kafka-topics.sh --create --zookeeper sandbox.hortonworks.com:2181 --replication-factor 1 --partitions 1 --topic Teste
+ - ./kafka-topics.sh --list --zookeeper sandbox.hortonworks.com:2181
+
+Publicando:
+ - sandbox.hortonworks.com:6667 <= porta do servidor kafka
+ - ./kafka-console-producer.sh --broker-list sandbox.hortonworks.com:6667 --topic Teste
+ - Escreva alguma coisa aqui
+
+Consumindo:
+ - Em um segundo console
+ - ./kafka-console-consumer.sh --bootstrap-server sandbox.hortonworks.com:6667 --zookeeper localhost:2181 --topic Teste --from-beginning
+ - Recebe as mensagens escritas anteriormente
+
+
+Exemplo: Publicando logs
+
+Configurando uma source e uma sink de dados:
+ - cd /usr/hdp/current/kafka-broker/conf
+ - Faça backup dos arquivos originais:
+   - connect-standalone.properties
+   - connect-file-source.properties
+   - connect-file-sink.properties
+ - vi connect-standalone.properties
+   - bootstrap.servers=sandbox.hortonworks.com:6667
+ - vi connect-file-sink.properties
+   - file=/home/maria_dev/logout.txt
+   - topics=log-test
+ - vi connect-file-source.properties
+   - file=/home/maria_dev/access_log_small.txt
+   - topic=log-test
+
+Definindo um consumidor para ver o que está acontecendo:
+ - cd /usr/hdp/current/kafka-broker/bin
+ - ./kafka-console-consumer.sh --bootstrap-server sandbox.hortonworks.com:6667 --topic log-test --zookeeper localhost:2181
+
+Definindo o Publisher e o Consumer que irá consumir o arquivo e publicar em outro lugar:
+ - cd /usr/hdp/current/kafka-broker/bin
+ - ./connect-standalone.sh ~/connect-standalone.properties ~/connect-file-source.properties ~/connect-file-sink.properties
+ 
+Isso é bem próximo ao que acontece no mundo real. É possível ver que o kafka-standalone publicou os dados recebidos do arquivo access_log_small.txt para o logout.txt. Enquanto o kafka-standalone estiver executando qualquer nova inserção ao access_log_small.txt será publicada para o logout.txt
+

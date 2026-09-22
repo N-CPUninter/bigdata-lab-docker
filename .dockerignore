@@ -1,0 +1,6 @@
+.git
+docs
+tests
+aulas
+data/imdb-reviews-pt-br.csv
+*.md

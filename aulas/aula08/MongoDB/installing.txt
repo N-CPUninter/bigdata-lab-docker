@@ -1,0 +1,9 @@
+cd /var/lib/ambari-server/resources/stacks/HDP/<HDP_version>/services
+git clone https://github.com/nikunjness/mongo-ambari.git
+sudo service ambari restart
+login at ambari as admin
+actions -> add service
+MongoDB 3.2
+Accept defaults
+
+pip pymongo

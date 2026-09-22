@@ -1,0 +1,69 @@
+What is Flume?
+ - Another way to stream data into your cluster
+ - Made from the start with Hadoop in mind
+   - Built-in sinks for HDFS and HBase
+ - Originally made to handle log aggregation
+
+Components of an agent
+ - Source
+   - Where data is coming from
+   - Can optionally have Channel Selectors and Interceptors
+ - Channel
+   - How the data is transferred (via memory or file)
+ - Sink
+   - Where the data is going
+   - Can be organized into Sink Groups
+   - A sink can connect to only one channel
+     - Channel is notified to delete a message once the sink processes it.
+
+Built-in source Types
+ - Spooling directory
+ - Avro
+ - Kafka
+ - Exec
+ - Thrift
+ - Netcat
+ - HTTP
+ - Custom
+ - And more!
+
+Built-in Sink Types
+ - HDFS
+ - Hive
+ - HBase
+ - Avro
+ - Thrift
+ - Elasticsearch
+ - Kafka
+ - Custom
+ - And more!
+
+Using Avro, agents can connect to other agents as well
+
+Think of Flume as a buffer between your data and your cluster
+
+Exemplo com Flume: logger
+
+cd /usr/hdp/current/flume-server/
+bin/flume-ng agent --conf conf --conf-file ~/example.conf --name a1 -Dflume.root.logger=INFO,console
+
+ - Em outro terminal:
+
+telnet localhost 44444
+Escreva a mensagem que deseja enviar ao log.
+
+
+Exemplo com Flume: monitorar diretório e enviar para o HDFS
+
+ - Criar os diretórios:
+mkdir spool
+Ambari > Files view > user > maria_dev > New folder > flume
+cd /usr/hdp/current/flume-server/
+bin/flume-ng agent --conf conf --conf-file ~/flumelogs.conf --name a1 -Dflume.root.logger=INFO,console
+
+ - Coloque arquivos!
+cp access_log_small.txt spool/log.txt
+
+ - Os arquivos consumidos ganham uma extensão .COMPLETED
+
+

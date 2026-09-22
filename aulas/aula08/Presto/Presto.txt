@@ -1,0 +1,80 @@
+What is Presto
+ - It's a lot like Drill
+   - it can connect to many different "big data" databases and data stores at once, and query across them
+   - Familiar SQL syntax
+   - Optimized for OLAP - analytical queries, data warehousing
+ - Developer, and still partially maintained by Facebook
+ - Exposes JDBC, Command-Line and Tableau interfaces
+
+Why Presto
+ - Vs. Drill? Well, it has a Cassandra connector for one thing.
+ - If it's good enough for Facebook...
+   - "Facebook uses Presto for interactive queries against several internal data stores, including their 300PB data to run more than 30000 queries that in total scan over a petabyte each per day."
+   - Also used by DropBox and AirBnB
+ - "A single Presto query can combine data from multiple sources, allowing for analytics across your entire organization."
+ - "Presto breaks the false choice between having fast analytixs using a slow "free" solution that requires excessive hardware."
+
+What can Presto connect to?
+ - Cassandra (It's Facebook, after all)
+ - Hive
+ - MongoDB
+ - MySQL
+ - Local files
+ - And stuff we haven't talked about just yet:
+   - Kafka, JMX, PostgreSQL, Redis, Accumulo
+
+Instalando Presto:
+ - Buscar o link na página da documentação do Presto: prestodb.io
+ - wget https://repo1.maven.org/maven2/com/facebook/presto/presto-server/0.235.1/presto-server-0.235.1.tar.gz
+ - tar -xzf presto-server-0.235.1.tar.gz
+ - cd presto-server-0.235.1/
+ - Crie os arquivos de configuração descritos na documentação
+ - Buscar o link da interface de linha de comando:
+ - wget https://repo1.maven.org/maven2/com/facebook/presto/presto-cli/0.235.1/presto-cli-0.235.1-executable.jar
+ - mv presto-cli-0.235.1-executable.jar bin/
+ - cd bin/
+ - mv presto-cli-0.235.1-executable.jar presto
+ - chmod +x presto
+ - cd ..
+ - pwd # you must be in presto-cli-0.235.1/
+ - bin/launcher start
+
+Acessar Presto:
+ - 127.0.0.1:8090
+
+Iniciar CLI conectado no hive:
+ - bin/presto --server 127.0.0.1:8090 --catalog hive
+ - show tables from default; # exibe tabelas do hive
+ - select * from default.ratings limit 10;
+ - select * from default.ratings where rating = 5 limit 10;
+ - select count(*) from default.ratings where rating = 1;
+
+Pode ver as estatísticas de uso na interface do Presto em 127.0.0.1:8090
+
+Parar Presto
+ - bin/launcher stop
+
+
+Exemplo com Cassandra
+ - Iniciar Cassandra como já explicado
+ - cqlsh --cqlversion="3.4.0"
+ - use movielens;
+ - describe table;
+ - select * from users limit 10;
+ - quit
+ - Configurar Cassandra no Presto:
+ - cd presto-server-0.235.1/etc/catalog/
+ - vi cassandra.properties
+connector.name=cassandra
+cassandra.contact-points=127.0.0.1
+ - cd ../..
+ - Iniciar Presto:
+ - bin/launcher start
+ - bin/presto --server 127.0.0.1:8090 --catalog hive,cassandra
+ - show tables from cassandra.movielens;
+ - describe cassandra.movielens.users;
+ - select * from cassandra.movielens.users limit 10;
+ - select * from hive.default.ratings limit 10;
+ - select u.occupation, count(*) from hive.default.ratings r join cassandra.movielens.users u on r.user_id = u.user_id group by u.occupation;
+
+É possível criar conectores como acabamos de fazer com Cassandra. Tudo está descrito na documentação.

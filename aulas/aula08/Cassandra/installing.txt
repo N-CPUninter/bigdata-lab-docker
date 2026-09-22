@@ -1,0 +1,45 @@
+Instalando Cassandra em um node
+===============================
+
+- Para trocar a versão do python sem quebrar o sistema operacional:
+  - yum install scl-utils
+  - yum install centos-release-scl-rh
+  - yum install python27 # necessário para rodar cassandra
+- Enable python2.7:
+  - scl enable python27 bash
+- Adicionar o repositório para instalar Cassandra:
+  - cd /etc/yum.repos.d
+  - vi datastax.repo
+  - add datastax.repo
+- Instalar Cassandra:
+  - yum install dsc30
+- Install cql shell:
+  - pip install sqlsh
+- Run Cassandra
+  - service cassandra start
+- Para rodar o cql shell com uma versão específica de cql:
+  - cqlsh --cqlversion="3.4.0"
+
+===============================
+
+datastax.repo:
+==============
+
+[datastax]
+name - DataStax Repo for apache Cassandra
+baseurl = http://rpm.datastax.com/community
+enabled = 1
+gpgcheck = 0
+===============================
+
+Criando uma tabela
+==================
+
+# Como estamos rodando o exemplo em um único nó, vamos manter a estratégia de replicação simples, com apenas uma cópia
+# Essas configurações devem ser adaptadas para cada caso
+
+CREATE KEYSPACE movielens WITH replication = {'class': 'SimpleStrategy', 'replication_factor':'1'} AND durable_writes = true;
+USE movielens;
+CREATE table users (user_id int, age int, gender text, occupation text, zip text, PRIMARY KEY (user_id));
+DESCRIBE TABLE users;
+SELECT * FROM users;

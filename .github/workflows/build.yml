@@ -1,0 +1,63 @@
+name: build-sandbox
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/bigdata-sandbox
+
+jobs:
+  build:
+    # A imagem tem ~8 GB e o build baixa ~7 GB: o runner hospedado precisa de disco extra.
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Liberar espaço em disco no runner
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: false
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build e push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: sandbox/Dockerfile
+          platforms: linux/amd64
+          add-hosts: sandbox.hortonworks.com:127.0.0.1
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
+      - name: Teste de fumaça (aula 10)
+        run: |
+          echo "IMAGE=${IMAGE}" > .env
+          echo "TAG=latest" >> .env
+          bash tests/ci.sh aula10
+      - name: Logs em caso de falha
+        if: failure()
+        run: docker compose logs sandbox | tail -300

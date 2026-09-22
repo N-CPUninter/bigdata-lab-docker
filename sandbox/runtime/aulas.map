@@ -1,0 +1,17 @@
+# perfil | serviços do Ambari a ligar (- = nenhum) | descrição
+# Ordem importa: dependências primeiro. Serviços fora da lista são desligados.
+7        | ZOOKEEPER HDFS YARN MAPREDUCE2 HIVE OOZIE               | Pig (Pig View / grunt) + Oozie (workflow com Sqoop e Hive)
+7a       | ZOOKEEPER HDFS YARN MAPREDUCE2 HIVE                     | Só Pig (Pig View precisa de WebHCat, que faz parte do HIVE)
+8a       | ZOOKEEPER HDFS YARN MAPREDUCE2 HIVE                     | Hive, Sqoop/MariaDB, MapReduce com mrjob
+8b       | ZOOKEEPER HDFS YARN MAPREDUCE2 HBASE                    | HBase + Phoenix (+ Pig com HBaseStorage, que roda como job MapReduce)
+8c       | ZOOKEEPER HDFS                                          | MongoDB + Cassandra (sidecars: docker compose --profile nosql up -d) + Spark2
+8d       | ZOOKEEPER HDFS HIVE                                     | Drill + Presto (catálogo Hive via metastore 9083)
+9a       | ZOOKEEPER HDFS                                          | Flume (netcat / spooldir -> HDFS)
+9b       | ZOOKEEPER KAFKA                                         | Kafka (tópicos, produtor/consumidor, Kafka Connect)
+9c       | ZOOKEEPER                                               | Storm (lab storm start)
+9d       | -                                                       | Flink (tarball em ~/downloads, start-cluster.sh)
+10       | ZOOKEEPER HDFS                                          | PySpark local: RDD, DataFrame, Spark SQL, MLlib (lê u.data etc. do HDFS, como no vídeo)
+11       | ZOOKEEPER HDFS                                          | Igual à aula 10
+12       | ZOOKEEPER HDFS                                          | Spark Streaming (Flume -> Spark2 DStream) e Structured Streaming
+trabalho | ZOOKEEPER HDFS                                          | Atividade prática: upload via Files View + spark-submit (Spark 3)
+none     | -                                                       | Desliga todos os serviços (só Ambari/base no ar)
