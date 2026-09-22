@@ -1,0 +1,9 @@
+# Scripts e configs vao para dentro de containers Linux: sempre LF, mesmo em checkout no Windows.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.pdf binary
+*.docx binary
+*.jar binary
+*.tgz binary
+*.tar.gz binary
