@@ -68,12 +68,28 @@ tests/               testes de fumaça por aula
 
 ## Publicar a imagem (professor)
 
+A imagem fica no **GitHub Container Registry** (`ghcr.io`), como um pacote da organização dona do repositório. Não é preciso conta em outro serviço: o login é a mesma conta do GitHub, com um token que tenha o escopo `write:packages`.
+
 ```powershell
-docker login ghcr.io                      # token do GitHub com escopo write:packages
+# 1. token com escopo de pacotes (abre o navegador uma vez)
+gh auth refresh -h github.com -s write:packages
+gh auth token | docker login ghcr.io -u <seu-usuario-github> --password-stdin
+
+# 2. marcar e enviar (envia alguns GB; depende da sua banda de upload)
 .\publish.ps1 -Mode registry -Version 1.0.1 -Registry ghcr.io/n-cpuninter/bigdata-sandbox
-# ou, para distribuir como arquivo (~7 GB): .\publish.ps1 -Mode save -Version 1.0.1
 ```
-O workflow `.github/workflows/build.yml` faz o mesmo build no GitHub Actions a cada push na `main` (o runner precisa de ~40 GB livres; o workflow já limpa o disco).
+
+Depois do primeiro envio, abra a aba **Packages** da organização, escolha `bigdata-sandbox` e, em *Package settings*, mude a visibilidade para **Public**. Com o pacote público, o aluno baixa sem login e sem cota; enquanto ele estiver privado, cada aluno precisaria de um token próprio e o plano gratuito limita armazenamento e tráfego.
+
+O `LABEL org.opencontainers.image.source` do `sandbox/Dockerfile` liga o pacote a este repositório: ajuste-o se publicar em outra organização.
+
+Alternativa sem registro, para pendrive ou drive compartilhado:
+```powershell
+.\publish.ps1 -Mode save -Version 1.0.1      # gera bigdata-sandbox-1.0.1.tar.gz
+# no computador do aluno: docker load -i bigdata-sandbox-1.0.1.tar.gz
+```
+
+O workflow `.github/workflows/build.yml` faz o mesmo build no GitHub Actions a cada push na `main` (o runner precisa de ~40 GB livres; o workflow já limpa o disco). Nesse caminho o pacote nasce com a visibilidade do repositório e o login é automático.
 
 ## Construir a imagem localmente (opcional)
 

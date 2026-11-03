@@ -55,6 +55,11 @@ COPY sandbox/runtime/ /opt/lab/
 COPY sandbox/build/configs-8g.json sandbox/build/configs-16g.json /opt/lab/
 RUN chmod +x /opt/lab/entrypoint.sh /opt/lab/lab /opt/lab/*.sh && ln -sf /opt/lab/lab /usr/local/bin/lab
 
+# Liga o pacote ao repositório no GitHub (aba Packages) e descreve a imagem.
+LABEL org.opencontainers.image.source="https://github.com/N-CPUninter/bigdata-lab-docker"
+LABEL org.opencontainers.image.description="Sandbox Big Data: Ambari 2.7.11 + ODP 1.2.4 em um container, substituta da VM HDP 2.6.5"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+
 EXPOSE 8080 8888 4200 22 8020 8050 8088 50070 10000 11000 16010 8765 6667 8082 8744 8756 8090 4040 9995 8889
 VOLUME ["/hadoop", "/var/lib/mysql", "/var/lib/pgsql/data", "/home/maria_dev"]
 ENTRYPOINT ["/opt/lab/entrypoint.sh"]
