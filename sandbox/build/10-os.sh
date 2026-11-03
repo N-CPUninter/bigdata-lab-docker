@@ -57,6 +57,14 @@ cat >> /etc/security/limits.conf <<EOL
 * hard nproc 65536
 EOL
 
+# O Ambari grava /etc/security/limits.d/*.conf pedindo nproc 65536. Quando o container roda
+# com um hard limit menor (é o caso do runner do GitHub Actions), o pam_limits falha e o
+# "su" usado pelo agente recusa a sessão: "su: cannot open session: Permission denied".
+# Em sandbox esses limites não agregam segurança, então o pam_limits passa a ser opcional.
+for f in /etc/pam.d/system-auth /etc/pam.d/password-auth; do
+  sed -i --follow-symlinks -E 's/^(session[[:space:]]+)required([[:space:]]+)pam_limits\.so/\1optional\2pam_limits.so/' "$f"
+done
+
 # Locale UTF-8 (roteiros usam dados em pt-BR / ISO-8859-1)
 dnf -y install glibc-langpack-en glibc-langpack-pt && dnf clean all
 echo 'export LANG=en_US.UTF-8' > /etc/profile.d/lang.sh
