@@ -13,7 +13,7 @@
    processors=2
    ```
    Para 16 GB de RAM ou mais use `memory=10GB`. Salve com "Tipo: Todos os arquivos" para não virar `.wslconfig.txt`. Depois rode `wsl --shutdown` e abra o Docker Desktop de novo. Referência: [Configurações do WSL](https://learn.microsoft.com/pt-br/windows/wsl/wsl-config).
-5. Baixe o ZIP do projeto (plataforma da disciplina, ou **Code > Download ZIP** no GitHub) e extraia (botão direito > Extrair Tudo) em uma pasta **sem acentos e sem espaços** (ex.: `C:\bigdata-lab`).
+5. Baixe o ZIP do projeto pela plataforma da disciplina ou em [github.com/N-CPUninter/bigdata-lab-docker](https://github.com/N-CPUninter/bigdata-lab-docker) (botão verde **Code > Download ZIP**) e extraia (botão direito > Extrair Tudo) em uma pasta **sem acentos e sem espaços** (ex.: `C:\bigdata-lab`).
 6. Abra a pasta no Explorador, digite `powershell` na barra de endereço e Enter; então `.\lab.ps1 up`. Se o Windows bloquear o script: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ## macOS
