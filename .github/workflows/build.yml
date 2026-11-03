@@ -21,9 +21,6 @@ concurrency:
   group: build-sandbox
   cancel-in-progress: false
 
-env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/bigdata-sandbox
-
 jobs:
   build:
     # A imagem passa de 20 GB e o build baixa ~8 GB: o runner hospedado precisa de disco extra.
@@ -34,6 +31,10 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+
+      # O registro exige o nome em minúsculas, e o dono (N-CPUninter) tem maiúsculas.
+      - name: Definir o nome da imagem
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/bigdata-sandbox" >> "$GITHUB_ENV"
 
       - name: Liberar espaço em disco no runner
         uses: jlumbroso/free-disk-space@v1.3.1
