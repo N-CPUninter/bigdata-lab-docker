@@ -1,24 +1,40 @@
 name: build-sandbox
 
+# Só reconstrói quando algo que entra na IMAGEM muda. Alterações de README, docs/,
+# aulas/ ou data/ não disparam build (o conteúdo das aulas é montado por bind mount).
 on:
   push:
     branches: [main]
-    tags: ["v*"]
+    paths:
+      - "sandbox/**"
+      - "docker-compose.yml"
+      - "tests/**"
+      - ".github/workflows/build.yml"
   workflow_dispatch:
+    inputs:
+      versao:
+        description: "Publicar também como esta versão e como :latest (ex.: 1.0.2). Vazio = só :edge"
+        required: false
+        default: ""
+
+concurrency:
+  group: build-sandbox
+  cancel-in-progress: false
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/bigdata-sandbox
 
 jobs:
   build:
-    # A imagem tem ~8 GB e o build baixa ~7 GB: o runner hospedado precisa de disco extra.
+    # A imagem passa de 20 GB e o build baixa ~8 GB: o runner hospedado precisa de disco extra.
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 360
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
+
       - name: Liberar espaço em disco no runner
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
@@ -28,21 +44,25 @@ jobs:
           haskell: true
           large-packages: true
           swap-storage: false
+
+      - name: Espaço disponível
+        run: df -h /
+
+      - name: Pré-baixar os tarballs (Pig, Flume, Storm, Drill, Presto, Flink, Python 3.7)
+        run: bash sandbox/build/prefetch.sh
+
       - uses: docker/setup-buildx-action@v3
+
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Tags
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE }}
-          tags: |
-            type=ref,event=tag
-            type=raw,value=latest,enable={{is_default_branch}}
-      - name: Build e push
+
+      # Todo build publica :edge e :sha-xxxxxxx. A tag :latest, que é a que os alunos
+      # baixam, só é movida no passo de promoção, depois que o teste de fumaça passa.
+      - name: Build e push (edge)
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -50,14 +70,41 @@ jobs:
           platforms: linux/amd64
           add-hosts: sandbox.hortonworks.com:127.0.0.1
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
+          provenance: false
+          tags: |
+            ${{ env.IMAGE }}:edge
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+
       - name: Teste de fumaça (aula 10)
         run: |
           echo "IMAGE=${IMAGE}" > .env
-          echo "TAG=latest" >> .env
+          echo "TAG=edge" >> .env
           bash tests/ci.sh aula10
+
       - name: Logs em caso de falha
         if: failure()
         run: docker compose logs sandbox | tail -300
+
+      # Só em execução manual com o campo "versao" preenchido: copia a imagem já testada
+      # para :<versao> e :latest, sem reconstruir nada.
+      - name: Promover para :latest
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.versao != '' }}
+        run: |
+          docker buildx imagetools create \
+            --tag "${IMAGE}:${{ inputs.versao }}" \
+            --tag "${IMAGE}:latest" \
+            "${IMAGE}@${{ steps.build.outputs.digest }}"
+          echo "Publicado ${IMAGE}:${{ inputs.versao }} e :latest"
+
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo "### Imagem"
+            echo ""
+            echo "- \`${IMAGE}:edge\`"
+            echo "- \`${IMAGE}:sha-${GITHUB_SHA}\`"
+            echo "- digest: \`${{ steps.build.outputs.digest }}\`"
+            echo ""
+            echo "Para promover a \`:latest\`, rode este workflow manualmente (Run workflow) preenchendo o campo **versao**."
+          } >> "$GITHUB_STEP_SUMMARY"

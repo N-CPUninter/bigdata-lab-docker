@@ -2,6 +2,7 @@
 # Pré-baixa no host os tarballs usados no build (Pig, Flume, Storm, Drill, Presto, Flink, Python 3.7)
 # para sandbox/build/downloads/. O Dockerfile copia a pasta e os scripts usam a cópia local se existir.
 set -uo pipefail
+mkdir -p "$(dirname "$0")/downloads"
 cd "$(dirname "$0")/downloads"
 urls=(
   https://dlcdn.apache.org/pig/pig-0.18.0/pig-0.18.0.tar.gz

@@ -43,6 +43,12 @@ const intro = [
   P("A disciplina de Big Data usa, nas aulas práticas, a máquina virtual Hortonworks HDP 2.6.5. Essa máquina foi descontinuada: o download não está mais disponível, os repositórios de pacotes deixaram de existir, o boot leva de trinta a sessenta minutos (e cerca de doze horas em computadores Apple com chip M1/M2/M3) e ela exige 8 GB de memória só para si."),
   P("A **Sandbox Big Data** substitui essa máquina virtual por um ambiente Docker. Ela mantém o que os vídeos das aulas mostram (o Ambari, o usuário `maria_dev`, o nome `sandbox.hortonworks.com`, as mesmas portas e senhas) usando componentes atuais e mantidos: Apache Ambari 2.7.11 e a distribuição ODP 1.2.4, que é a continuação em código aberto do HDP."),
   P("A diferença mais importante para quem tem um computador modesto: em vez de ligar todos os serviços de uma vez, a sandbox liga **somente os serviços que cada aula usa**. Por isso ela roda em computadores com 8 GB de RAM, embora 16 GB ou mais tornem o uso mais confortável."),
+  Spacer(60),
+  Note("Comece por aqui", [
+    "**1.** Confira os requisitos (seção 2.1) e instale o Docker Desktop seguindo o capítulo 2 do seu sistema. **2.** Baixe e extraia o ZIP do projeto em uma pasta sem espaços nem acentos. **3.** Abra um terminal nessa pasta e rode `.\lab.ps1 up` (Windows) ou `./lab.sh up` (macOS e Linux). **4.** Rode `aula <perfil>` para a aula que vai estudar e espere a mensagem `PRONTO`. **5.** Abra o terminal da sandbox em http://localhost:4200 e siga o roteiro da aula, no capítulo 5.",
+    "Não é preciso conhecer Docker, terminal ou acesso remoto: cada passo está escrito por extenso. Leia na ordem na primeira vez.",
+  ]),
+  Spacer(60),
   H2("1.1 O que você vai encontrar neste guia"),
   Bullet("Como instalar o Docker e a sandbox no Windows, macOS ou Linux (capítulo 2)."),
   Bullet("Como ligar a sandbox, preparar uma aula e acessar o Ambari, o terminal e as demais interfaces (capítulos 3 e 4)."),
