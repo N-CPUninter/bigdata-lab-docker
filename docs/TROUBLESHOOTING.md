@@ -1,7 +1,21 @@
 # Problemas comuns
 
+Dúvidas em forma de pergunta, com mais contexto, estão no [FAQ](FAQ.md).
+
 **`.\lab.ps1` não roda ("execução de scripts foi desabilitada")**
 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` no PowerShell, uma vez.
+
+**"O arquivo lab.ps1 não está assinado digitalmente"**
+O ZIP veio da internet e o Windows marcou os arquivos. Desbloqueie o ZIP antes de extrair (botão direito > Propriedades > Desbloquear) ou, se já extraiu, rode na pasta do projeto: `Get-ChildItem -Recurse | Unblock-File`.
+
+**`Set-ExecutionPolicy` avisa que a configuração "é substituída por uma política definida em um escopo mais específico"**
+Máquina gerenciada por Diretiva de Grupo (`Get-ExecutionPolicy -List` mostra `MachinePolicy`/`UserPolicy` definidos). Use `powershell -ExecutionPolicy Bypass -File .\lab.ps1 up`, ou ignore o script e chame o `docker compose` direto (equivalentes no [FAQ](FAQ.md#como-uso-a-sandbox-sem-o-labps1-ou-o-labsh)).
+
+**"You are not allowed to use Docker. You must be in the 'docker-users' group"**
+Um administrador roda `net localgroup docker-users "NOME-DO-PC\usuario" /add`; depois saia e entre na sessão do Windows.
+
+**"An attempt was made to access a socket in a way forbidden by its access permissions"**
+O Windows reservou a porta para o Hyper-V. Confira com `netsh interface ipv4 show excludedportrange protocol=tcp`; como administrador, `net stop winnat` e `net start winnat`, ou troque a porta no `docker-compose.yml`.
 
 **`docker: error during connect` / "Docker Desktop is not running"**
 Abra o Docker Desktop e espere a baleia ficar estável. No Windows, confira que o WSL2 está instalado (`wsl --status`).

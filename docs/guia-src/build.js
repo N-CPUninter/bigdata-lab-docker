@@ -55,6 +55,7 @@ const intro = [
   Bullet("Um roteiro para cada aula prática, indicando exatamente o que muda em relação ao vídeo (capítulo 5)."),
   Bullet("Como fazer a Atividade Prática, no Google Colab ou na sandbox, à sua escolha (capítulo 6)."),
   Bullet("Orientações sobre memória, boas práticas e solução de problemas (capítulos 7 e 8)."),
+  Bullet("Perguntas frequentes, com as travas de política do Windows, erros de instalação e dúvidas do dia a dia (capítulo 9)."),
   Bullet("Apêndices com a tabela de versões, a errata dos materiais originais e a lista de diferenças para a VM HDP."),
   H2("1.2 Convenções usadas no texto"),
   P("Comandos e nomes de arquivos aparecem em fonte monoespaçada, como `lab aula 7`. Blocos de comando aparecem em caixas cinza; digite-os linha a linha. Comandos que começam com `.\\lab.ps1` são executados no PowerShell do **seu computador**, dentro da pasta do projeto. Comandos como `lab`, `hdfs`, `pig` ou `spark-submit` são executados **dentro da sandbox** (no terminal web ou por SSH), como usuário `maria_dev`."),
@@ -89,7 +90,7 @@ const instal = [
   ...Code(["[wsl2]", "memory=6GB", "swap=6GB", "processors=2", "autoMemoryReclaim=gradual"]),
   P("Em seguida, no PowerShell, execute `wsl --shutdown` e abra o Docker Desktop novamente para o limite passar a valer. Referência: [Configurações avançadas do WSL](https://learn.microsoft.com/pt-br/windows/wsl/wsl-config)."),
   H3("Passo 5 — Baixar e extrair a sandbox"),
-  P("Baixe o arquivo ZIP do projeto na plataforma da disciplina ou em [github.com/N-CPUninter/bigdata-lab-docker](https://github.com/N-CPUninter/bigdata-lab-docker), pelo botão verde **Code > Download ZIP**. Clique com o botão direito no arquivo baixado e escolha **Extrair Tudo...**. Na janela que abre, apague o caminho sugerido e digite `C:\\bigdata-lab`, depois clique em **Extrair**. O caminho não pode ter espaços nem acentos; evite pastas como “Área de Trabalho” ou “Documentos” dentro do OneDrive."),
+  P("Baixe o arquivo ZIP do projeto na plataforma da disciplina ou em [github.com/N-CPUninter/bigdata-lab-docker](https://github.com/N-CPUninter/bigdata-lab-docker), pelo botão verde **Code > Download ZIP**. Antes de extrair, clique com o botão direito no arquivo baixado, escolha **Propriedades** e, se aparecer a opção **Desbloquear** na parte de baixo da aba **Geral**, marque-a e clique em OK: sem isso o Windows trata os scripts do projeto como arquivos de origem desconhecida e recusa executá-los. Depois clique com o botão direito no arquivo e escolha **Extrair Tudo...**. Na janela que abre, apague o caminho sugerido e digite `C:\\bigdata-lab`, depois clique em **Extrair**. O caminho não pode ter espaços nem acentos; evite pastas como “Área de Trabalho” ou “Documentos” dentro do OneDrive."),
   H3("Passo 6 — Subir a sandbox"),
   P("Abra o Explorador de Arquivos em `C:\\bigdata-lab` (a pasta onde estão os arquivos `lab.ps1` e `docker-compose.yml`), clique na barra de endereço, digite `powershell` e pressione Enter: um PowerShell abre já dentro da pasta. Execute:"),
   ...Code([".\\lab.ps1 up"]),
@@ -406,6 +407,155 @@ const prob = [
   ], [3, 5.5]),
 ];
 
+// ---------------------------------------------------------------- 9. FAQ
+const faq = [
+  H1("9. Perguntas frequentes"),
+  P("Respostas curtas para as dúvidas mais comuns, na ordem em que elas costumam aparecer: primeiro as da instalação no Windows, depois as do uso no dia a dia. Se o seu caso não estiver aqui, veja também a tabela do capítulo 8."),
+
+  H2("9.1 Políticas e permissões do Windows"),
+  P("Este é o grupo que gera mais dúvida, e nada aqui é defeito da sandbox: o Windows bloqueia, por padrão, arquivos baixados da internet e scripts sem assinatura digital. São proteções do sistema que você libera uma única vez."),
+
+  H3("Aparece “não é possível carregar o arquivo … porque a execução de scripts foi desabilitada neste sistema”"),
+  P("O Windows vem configurado para não executar nenhum script do PowerShell. Execute uma única vez o comando abaixo na mesma janela, responda `S` e repita o `.\\lab.ps1 up`. Ele vale somente para o seu usuário e não pede senha de administrador."),
+  ...Code(["Set-ExecutionPolicy -Scope CurrentUser RemoteSigned"]),
+
+  H3("Liberei a política, mas agora aparece “O arquivo lab.ps1 não está assinado digitalmente”"),
+  P("O arquivo veio da internet e o Windows o marcou como “de outro computador”. A política `RemoteSigned` recusa justamente scripts baixados que não tenham assinatura digital — é o caso dos nossos. O melhor caminho é desbloquear o **ZIP antes de extrair**: botão direito no arquivo baixado, **Propriedades**, e na parte de baixo da aba **Geral** marque **Desbloquear** e clique em OK. Se já extraiu, abra o PowerShell na pasta do projeto e execute:"),
+  ...Code(["Get-ChildItem -Recurse | Unblock-File"]),
+  P("Esse comando só remove a marca de origem dos arquivos que você acabou de baixar. Ele não altera o conteúdo deles nem desliga nenhuma proteção do Windows."),
+
+  H3("O Set-ExecutionPolicy responde que “a configuração é substituída por uma política definida em um escopo mais específico”"),
+  P("O computador é gerenciado por uma empresa, escola ou órgão público, e a política está fixada por Diretiva de Grupo. Confirme com `Get-ExecutionPolicy -List`: se a linha `MachinePolicy` ou `UserPolicy` mostrar algo diferente de `Undefined`, você não consegue alterar isso sem o setor de TI. Há duas saídas que não dependem de ninguém:"),
+  Bullet("Não usar o `lab.ps1` e chamar o Docker diretamente — os comandos equivalentes estão na pergunta seguinte."),
+  Bullet("Executar o script apenas nesta janela, sem mudar nada no sistema: `powershell -ExecutionPolicy Bypass -File .\\lab.ps1 up`."),
+
+  H3("Como uso a sandbox sem o lab.ps1 ou o lab.sh?"),
+  P("Os dois scripts só economizam digitação: tudo que eles fazem são comandos do `docker compose`. Na pasta do projeto, estes são os equivalentes, iguais no Windows, no macOS e no Linux:"),
+  ...Code([
+    "docker compose up -d                          # subir a sandbox",
+    "docker compose exec sandbox lab wait-ambari   # esperar o Ambari responder",
+    "docker compose exec sandbox lab urls          # ver os endereços de acesso",
+    "docker compose exec sandbox lab aula 10       # preparar a aula 10",
+    "docker compose exec sandbox lab status        # ver o que está de pé",
+    "docker compose --profile nosql down           # desligar",
+    "",
+    "docker compose exec -u maria_dev -w /home/maria_dev sandbox bash -l   # terminal",
+  ]),
+
+  H3("Apareceu “O Windows protegeu o seu PC” ao abrir o instalador do Docker Desktop"),
+  P("É o SmartScreen avisando que o arquivo ainda é pouco comum na sua máquina. Desde que você tenha baixado do site oficial ([docs.docker.com](https://docs.docker.com/desktop/setup/install/windows-install/)), clique em **Mais informações** e depois em **Executar assim mesmo**. Se esse botão não aparecer, o bloqueio vem de uma política da instituição e só o setor de TI pode liberar."),
+
+  H3("O Docker Desktop diz “You are not allowed to use Docker. You must be in the ‘docker-users’ group”"),
+  P("No Windows, o Docker Desktop só permite o uso a quem está no grupo local `docker-users`. O instalador inclui automaticamente a conta que instalou; se a instalação foi feita por outra pessoa (um técnico, por exemplo), um administrador precisa executar o comando abaixo em um PowerShell aberto como administrador. Depois disso, saia e entre novamente na sua sessão do Windows."),
+  ...Code(["net localgroup docker-users \"NOME-DO-PC\\seu_usuario\" /add"]),
+
+  H3("wsl --install responde “Acesso negado” ou pede privilégios de administrador"),
+  P("Esse comando exige um PowerShell aberto com **Executar como administrador**. Em notebooks corporativos ou de laboratório sem direitos de administrador não há como instalar o WSL2 por conta própria; fale com o setor de TI. Enquanto isso, a Atividade Prática pode ser feita no Google Colab (capítulo 6), que roda no navegador e não instala nada no computador."),
+
+  H3("O Gerenciador de Tarefas mostra “Virtualização: Desabilitado” e eu não consigo entrar na BIOS"),
+  P("Sem virtualização o Docker Desktop não funciona, e essa opção fica na BIOS/UEFI do equipamento — em máquinas gerenciadas, normalmente protegida por senha. Antes de desistir, verifique se não é conflito de software: VPNs corporativas, alguns antivírus e máquinas virtuais abertas (VirtualBox, VMware) podem estar ocupando o recurso de virtualização. Feche-os e reinicie o computador. Se a mensagem continuar, é caso para o setor de TI."),
+
+  H3("O antivírus reclamou, ou tudo ficou lentíssimo depois de instalar"),
+  P("O **Acesso controlado a pastas** do Windows Defender e alguns antivírus de terceiros bloqueiam a gravação do Docker em pastas pessoais. Mantenha o projeto em `C:\\bigdata-lab`, fora de **Documentos**, **Área de Trabalho** e de qualquer pasta sincronizada pelo OneDrive. Se o antivírus continuar acusando, adicione essa pasta à lista de exclusões dele."),
+
+  H3("O Windows pediu permissão de firewall quando subi a sandbox. Preciso aceitar?"),
+  P("Sim. Marque a caixa de **redes privadas** e clique em **Permitir acesso**: é essa permissão que faz os endereços `localhost:8080`, `localhost:4200` e os demais chegarem até a sandbox. Se você negou sem querer, vá em **Painel de Controle > Sistema e Segurança > Firewall do Windows Defender > Permitir um aplicativo ou recurso** e libere o Docker Desktop."),
+
+  H3("Ao subir aparece “An attempt was made to access a socket in a way forbidden by its access permissions”"),
+  P("O Windows reserva faixas dinâmicas de portas TCP para uso interno do Hyper-V, e uma porta da sandbox pode cair dentro de uma delas. Veja as faixas reservadas com `netsh interface ipv4 show excludedportrange protocol=tcp`. Se alguma porta da sandbox (8080, 8888, 4200, 2222, 8088, 9870, 10000 ou 11000) estiver em uma faixa, abra um PowerShell como administrador, reinicie o serviço de rede do Hyper-V — o que faz o Windows recalcular as reservas — e suba a sandbox de novo:"),
+  ...Code(["net stop winnat", "net start winnat"]),
+  P("Se a porta continuar ocupada, troque o número do lado esquerdo na linha correspondente do `docker-compose.yml` (por exemplo `\"8081:8080\"` em vez de `\"8080:8080\"`) e use o novo número no navegador."),
+
+  H3("Posso deixar a pasta do projeto no OneDrive ou na Área de Trabalho?"),
+  P("Não é recomendado. O OneDrive pode guardar os arquivos apenas como atalhos na nuvem (“Arquivos sob demanda”), e então eles aparecem vazios dentro da sandbox. Além disso, caminhos com espaços e acentos (“Área de Trabalho”, “Documentos”) atrapalham o Docker no Windows. Use `C:\\bigdata-lab`."),
+
+  H3("Na extração do ZIP apareceu erro de “caminho muito longo”"),
+  P("O Windows limita caminhos a 260 caracteres por padrão. Extraia para uma pasta curta, como `C:\\bigdata-lab`, e não para dentro de algo como `Downloads\\bigdata-lab-docker-main\\bigdata-lab-docker-main\\`."),
+
+  H2("9.2 Docker e a imagem"),
+
+  H3("Preciso criar uma conta no Docker?"),
+  P("Não. Feche a tela de login com **Skip** ou **Continue without signing in**. A imagem da sandbox é pública e baixa sem login."),
+
+  H3("O download é muito grande e a conexão caiu no meio"),
+  P("A imagem tem cerca de 22 GB e é baixada **uma única vez**. Se a conexão cair, repita o comando: o Docker retoma de onde parou, camada por camada. Prefira rede por cabo ou um Wi-Fi estável, e evite redes com limite de dados."),
+
+  H3("“no space left on device” ou o Docker reclama de disco"),
+  P("Veja quanto o Docker está ocupando com `docker system df` e limpe o que não está em uso com `docker system prune`. **Não** use `docker system prune -a --volumes`: isso apagaria a imagem da sandbox e os seus dados. No Windows o disco do Docker fica dentro do WSL2, normalmente na unidade `C:`; se o `C:` estiver cheio, é preciso liberar espaço nele."),
+
+  H3("Como sei se estou com a versão mais nova da sandbox?"),
+  P("Na pasta do projeto, `docker compose pull` baixa a versão publicada mais recente; depois `.\\lab.ps1 up` (ou `./lab.sh up`) sobe com ela. Seus dados ficam em volumes do Docker e sobrevivem à atualização."),
+
+  H3("Funciona no Windows 10 ou 11 Home?"),
+  P("Sim. Com o WSL2 não é preciso ter o Windows Pro."),
+
+  H3("Depois de instalar, preciso de internet para estudar?"),
+  P("Não, fora do primeiro download. Só precisam de rede as aulas que buscam dados externos e, naturalmente, o Google Colab."),
+
+  H2("9.3 Subir a sandbox, portas e acessos"),
+
+  H3("localhost:8080 não abre logo depois do up"),
+  P("Na primeira subida o Ambari leva de dois a quatro minutos para responder. O comando `up` espera por ele e só então mostra os endereços de acesso; se você abriu o navegador antes disso, atualize a página. Passados cinco minutos, veja `.\\lab.ps1 logs` (ou `./lab.sh logs`)."),
+
+  H3("Quais são os usuários e senhas?"),
+  P("No Ambari, `admin` / `admin`. Dentro da sandbox, `maria_dev` / `maria_dev`, `raj_ops` / `raj_ops` e `root` / `hadoop`. São os mesmos da máquina virtual antiga. A lista completa de acessos está na seção 4.1."),
+
+  H3("Como entro por SSH? Preciso instalar o PuTTY?"),
+  P("Não precisa instalar nada: o Windows 10 e 11, o macOS e o Linux já trazem o comando `ssh`. No PowerShell ou no Terminal, execute `ssh maria_dev@localhost -p 2222` e informe a senha `maria_dev`. Na primeira vez ele pergunta se você confia nessa máquina; responda `yes`. Quem preferir pode usar o terminal no navegador, em [localhost:4200](http://localhost:4200), que não exige nada instalado e já entra como `maria_dev`."),
+
+  H3("O SSH passou a dizer “REMOTE HOST IDENTIFICATION HAS CHANGED”"),
+  P("Isso acontece depois de um `reset`: a sandbox foi recriada e tem uma identidade nova. Apague a identidade antiga e tente outra vez:"),
+  ...Code(["ssh-keygen -R \"[localhost]:2222\""]),
+
+  H3("A porta 8080 já é usada por outro programa meu"),
+  P("Troque o número do lado esquerdo no `docker-compose.yml` (`\"8081:8080\"`), suba a sandbox de novo e use `localhost:8081` no navegador. O mesmo vale para qualquer outra porta da lista da seção 4.2."),
+
+  H2("9.4 Durante as aulas"),
+
+  H3("O comando da aula falha com “Connection refused”, fica preso ou diz que o HDFS está em safe mode"),
+  P("Os serviços ainda não estão de pé. O `up` liga apenas o Ambari; é o `aula <perfil>` que liga os serviços daquela aula, e ele termina escrevendo `PRONTO em Xm00s`. Espere essa mensagem antes de digitar qualquer comando da aula, abrir o SSH ou as interfaces web. Para conferir a qualquer momento, use `lab status` dentro da sandbox ou `.\\lab.ps1 status` no seu computador."),
+
+  H3("Esqueci qual perfil está ligado"),
+  P("`.\\lab.ps1 status` (ou `./lab.sh status`) lista os serviços em pé. No Ambari, a mesma informação aparece na lista de serviços da esquerda: tudo verde significa pronto."),
+
+  H3("Posso trocar de aula sem desligar tudo?"),
+  P("Sim. Execute o `aula` com o novo perfil: ele desliga o que não é necessário e liga o que falta. Por exemplo `aula 7`, `aula 8a`, `aula 10`, `aula trabalho`, ou `aula none` para desligar tudo e deixar só o Ambari."),
+
+  H3("Meus arquivos somem quando eu desligo a sandbox?"),
+  P("Não. O `down` apenas para os containers: o HDFS, os bancos e a pasta da `maria_dev` ficam guardados em volumes do Docker. O único comando que apaga tudo é o `reset`, e ele pede confirmação digitando `SIM`."),
+
+  H3("Como levo um arquivo do meu computador para dentro da sandbox?"),
+  P("Coloque-o na pasta `data` ou `aulas` do projeto: elas aparecem dentro da sandbox como `/data` e `/aulas`. Para colocar o arquivo no HDFS, use o Files View do Ambari ou `hdfs dfs -put`."),
+
+  H3("No vídeo o NameNode abre em localhost:50070 e aqui não funciona"),
+  P("Dentro da sandbox a porta continua sendo a 50070, mas no seu navegador o endereço é [localhost:9870](http://localhost:9870), porque o Windows reserva a faixa 50000–50959 para uso interno."),
+
+  H3("Um serviço ficou vermelho no Ambari"),
+  P("Vá em **Ambari > Background Operations**, clique na operação e leia o `stderr`. As duas causas mais comuns são falta de memória (capítulo 7) e disco cheio do Docker. Repetir o `aula <perfil>` resolve boa parte dos casos."),
+
+  H2("9.5 Memória, desempenho e disco"),
+
+  H3("O Windows inteiro travou enquanto a sandbox rodava"),
+  P("Falta o limite de memória do WSL2, que é o passo 4 da seção 2.2. Sem o arquivo `.wslconfig` o WSL2 pode tomar metade da RAM do computador. Crie o arquivo, execute `wsl --shutdown` e abra o Docker Desktop novamente."),
+
+  H3("O processo vmmem (ou Docker Desktop) aparece usando vários GB"),
+  P("É esperado: essa é a memória da sandbox, e o teto é o que você definiu no `.wslconfig`. Em máquina de 8 GB use `memory=6GB`; com 16 GB ou mais, `memory=10GB`."),
+
+  H3("Tenho só 8 GB de RAM. Dá conta?"),
+  P("Sim, usando um perfil por vez e o perfil de memória `8g` (`lab mem 8g`). O que não cabe é ligar vários serviços pesados ao mesmo tempo, como Hive, HBase, Kafka e Storm juntos. A tabela de consumo por aula está no capítulo 7."),
+
+  H3("Posso fechar o Docker Desktop e continuar usando a sandbox?"),
+  P("Não: ele é o motor que roda a sandbox. Para liberar o computador sem perder nada, execute `.\\lab.ps1 down` (ou `./lab.sh down`) e só depois feche o Docker Desktop."),
+
+  H2("9.6 Atividade Prática"),
+
+  H3("Colab ou sandbox? A escolha muda a correção?"),
+  P("Não muda. O roteiro e os critérios são os mesmos nas duas plataformas; escolha a mais conveniente para você. O Colab não exige instalação e é a opção mais leve, inclusive em Mac com chip Apple."),
+
+  H3("A sessão do Colab caiu e perdi os arquivos"),
+  P("O Colab desliga a máquina após algum tempo sem uso e apaga os arquivos baixados, mas **o código que você escreveu fica salvo no notebook**. Execute de novo as células do início (download, descompactação e `pip`) e siga de onde parou."),
+];
+
 // ---------------------------------------------------------------- apêndices
 const apA = [
   H1("Apêndice A — Versões dos componentes"),
@@ -516,7 +666,7 @@ const doc = new Document({
   sections: [
     { properties: { page: { size: { width: PAGE_W, height: 16838 }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } }, children: capa },
     { properties: { page: { size: { width: PAGE_W, height: 16838 }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } }, headers: { default: header }, footers: { default: footer },
-      children: [...sumario, ...intro, ...instal, ...uso, ...amb, ...aulas, ...trab, ...mem, ...prob, ...apA, ...apB, ...apC] },
+      children: [...sumario, ...intro, ...instal, ...uso, ...amb, ...aulas, ...trab, ...mem, ...prob, ...faq, ...apA, ...apB, ...apC] },
   ],
 });
 

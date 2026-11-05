@@ -20,7 +20,7 @@ O que fazer, na ordem:
 
 A **Atividade Prática** pode ser feita nessa sandbox ou no notebook do Google Colab publicado no GitHub da disciplina. A escolha da plataforma é sua; as regras do roteiro valem para as duas.
 
-Requisitos mínimos: 8 GB de memória, 40 GB livres em disco e virtualização habilitada. Dúvidas sobre instalação e erros comuns estão no capítulo 8 do guia.
+Requisitos mínimos: 8 GB de memória, 40 GB livres em disco e virtualização habilitada. Dúvidas sobre instalação e erros comuns estão nos capítulos 8 e 9 do guia; o capítulo 9 é um FAQ e cobre as travas de política do Windows, que são o obstáculo mais comum na primeira instalação.
 
 ---
 
@@ -33,7 +33,7 @@ Você toparia testar antes de liberarmos para a turma?
 O que seria necessário:
 
 - Um computador com 8 GB de memória e 40 GB livres em disco, Windows, macOS ou Linux.
-- Baixar o projeto em <LINK> e seguir o Guia do Aluno em PDF, que está na pasta `docs`. Ele parte do zero, inclusive a instalação do Docker.
+- Baixar o projeto em <LINK> e seguir o Guia do Aluno em PDF, que está na pasta `docs`. Ele parte do zero, inclusive a instalação do Docker, e traz um capítulo de perguntas frequentes com as travas de política do Windows (execução de scripts, arquivos bloqueados, SmartScreen, firewall).
 - Rodar uma ou duas aulas práticas à sua escolha e a Atividade Prática.
 - Responder até <DATA> contando o que funcionou, o que travou e em que ponto do guia você teve dúvida. Prints das mensagens de erro ajudam bastante.
 

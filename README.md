@@ -270,14 +270,19 @@ Isso não é opcional. Os serviços Java vão ocupando mais memória com o tempo
 | `hdfs`, `hive` ou `spark-submit` dão erro de conexão | Os serviços ainda não terminaram de subir, ou você não rodou o `aula <perfil>`. Espere a faixa `PRONTO` e confira com `status` |
 | O Ambari não abre em `localhost:8080` | Veja `.\lab.ps1 logs`. Se outro programa já usa a porta 8080, troque-a no `docker-compose.yml` |
 | `.\lab.ps1` não roda no Windows | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, uma vez só |
+| "O arquivo lab.ps1 não está assinado digitalmente" | O ZIP veio da internet e ficou marcado. Na pasta do projeto: `Get-ChildItem -Recurse \| Unblock-File` |
+| O Docker Desktop diz que você não está no grupo `docker-users` | Um administrador precisa rodar `net localgroup docker-users "NOME-DO-PC\seu_usuario" /add`; depois saia e entre no Windows |
 | Tudo muito lento, computador travando | Reduza o `.wslconfig`, feche o navegador e use os perfis mais leves (`7a` no lugar de `7`) |
 | Quero começar do zero | `.\lab.ps1 reset` apaga HDFS, bancos e os arquivos criados dentro da sandbox |
+
+**Perguntas frequentes:** [docs/FAQ.md](docs/FAQ.md) — inclui as travas de política do Windows (execução de scripts, arquivos bloqueados, SmartScreen, firewall, portas reservadas, antivírus), que são o obstáculo mais comum na primeira instalação.
 
 Lista completa, com mais casos e as mensagens de erro exatas: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 Outros documentos úteis:
 
-- [docs/Guia-do-Aluno.pdf](docs/Guia-do-Aluno.pdf) — tudo isto em PDF, com índice.
+- [docs/Guia-do-Aluno.pdf](docs/Guia-do-Aluno.pdf) — tudo isto em PDF, com índice e perguntas frequentes.
+- [docs/FAQ.md](docs/FAQ.md) — perguntas frequentes, com as travas de política do Windows.
 - [aulas/ERRATA.md](aulas/ERRATA.md) — o que mudou nos comandos em relação aos vídeos.
 - [docs/DIFERENCAS-HDP.md](docs/DIFERENCAS-HDP.md) — o que é diferente da VM antiga e por quê.
 - [docs/INSTALACAO.md](docs/INSTALACAO.md) — instalação em mais detalhe.

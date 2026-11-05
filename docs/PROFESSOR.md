@@ -14,7 +14,7 @@ sandbox/             Dockerfile e scripts de build/runtime da imagem
   runtime/           entrypoint.sh, CLI lab, aulas.map, ambari-config.py, splash
 aulas/               arquivos das aulas 7–12 e do trabalho + GUIA.md por aula
 data/                ml-100k, customer-orders, access_log, movielens.sql
-docs/                instalação, memória, diferenças para o HDP, validação, problemas, guia em PDF
+docs/                instalação, memória, diferenças para o HDP, validação, problemas, FAQ, guia em PDF
 docs/guia-src/       fonte do Guia do Aluno (docx-js): build.js e lib.js
 tests/               testes de fumaça por aula + ci.sh
 ```
