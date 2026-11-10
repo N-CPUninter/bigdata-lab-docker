@@ -271,6 +271,7 @@ Isso não é opcional. Os serviços Java vão ocupando mais memória com o tempo
 | O Ambari não abre em `localhost:8080` | Veja `.\lab.ps1 logs`. Se outro programa já usa a porta 8080, troque-a no `docker-compose.yml` |
 | `.\lab.ps1` não roda no Windows | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, uma vez só |
 | "O arquivo lab.ps1 não está assinado digitalmente" | O ZIP veio da internet e ficou marcado. Na pasta do projeto: `Get-ChildItem -Recurse \| Unblock-File` |
+| O PowerShell recusa o `lab.ps1` mesmo depois de liberar a política | `Unblock-File -Path .\lab.ps1` e depois `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\lab.ps1 up`. Resolve a marca de origem e a política fixada pela instituição de uma vez |
 | O Docker Desktop diz que você não está no grupo `docker-users` | Um administrador precisa rodar `net localgroup docker-users "NOME-DO-PC\seu_usuario" /add`; depois saia e entre no Windows |
 | Tudo muito lento, computador travando | Reduza o `.wslconfig`, feche o navegador e use os perfis mais leves (`7a` no lugar de `7`) |
 | Quero começar do zero | `.\lab.ps1 reset` apaga HDFS, bancos e os arquivos criados dentro da sandbox |

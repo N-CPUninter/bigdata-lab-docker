@@ -15,6 +15,20 @@ Respostas curtas para as dúvidas mais comuns, na ordem em que elas costumam apa
 
 Este é o grupo que gera mais dúvida, e nada aqui é defeito da sandbox: o Windows bloqueia, por padrão, arquivos baixados da internet e scripts sem assinatura digital. São proteções do sistema que você libera uma única vez.
 
+### Atalho: a sequência que destrava o `lab.ps1` em qualquer computador
+
+Se você só quer que funcione, sem entender cada bloqueio, execute estes dois comandos no PowerShell, dentro da pasta do projeto:
+
+```powershell
+Unblock-File -Path .\lab.ps1
+```
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\lab.ps1 up
+```
+
+O primeiro tira a marca de "arquivo vindo da internet". O segundo executa o script ignorando a política de execução **apenas naquela janela**, sem mudar nenhuma configuração do Windows. Depois é só trocar o `up` pelo comando que você quiser: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\lab.ps1 aula 10`. As perguntas a seguir explicam cada bloqueio em separado, para quem quiser entender o que está acontecendo.
+
 ### Aparece "não é possível carregar o arquivo … porque a execução de scripts foi desabilitada neste sistema"
 
 O Windows vem configurado para não executar nenhum script do PowerShell. Execute uma única vez o comando abaixo na mesma janela, responda `S` e repita o `.\lab.ps1 up`. Ele vale somente para o seu usuário e não pede senha de administrador.
@@ -35,12 +49,14 @@ Get-ChildItem -Recurse | Unblock-File
 
 Esse comando só remove a marca de origem dos arquivos que você acabou de baixar. Ele não altera o conteúdo deles nem desliga nenhuma proteção do Windows.
 
+Se mesmo depois de desbloquear o arquivo o PowerShell continuar recusando, a política do seu computador está fixada pela instituição — veja a pergunta seguinte.
+
 ### O `Set-ExecutionPolicy` responde que "a configuração é substituída por uma política definida em um escopo mais específico"
 
 O computador é gerenciado por uma empresa, escola ou órgão público, e a política está fixada por Diretiva de Grupo. Confirme com `Get-ExecutionPolicy -List`: se a linha `MachinePolicy` ou `UserPolicy` mostrar algo diferente de `Undefined`, você não consegue alterar isso sem o setor de TI. Há duas saídas que não dependem de ninguém:
 
 - Não usar o `lab.ps1` e chamar o Docker diretamente — veja a pergunta seguinte.
-- Executar o script apenas nesta janela, sem mudar nada no sistema: `powershell -ExecutionPolicy Bypass -File .\lab.ps1 up`.
+- Executar o script apenas nesta janela, sem mudar nada no sistema: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\lab.ps1 up`.
 
 ### Como uso a sandbox sem o `lab.ps1` ou o `lab.sh`?
 

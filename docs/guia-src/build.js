@@ -96,6 +96,12 @@ const instal = [
   ...Code([".\\lab.ps1 up"]),
   P("Se aparecer a mensagem “a execução de scripts foi desabilitada neste sistema”, execute uma única vez o comando abaixo, responda `S` e repita o `.\\lab.ps1 up`:"),
   ...Code(["Set-ExecutionPolicy -Scope CurrentUser RemoteSigned"]),
+  Note("Se o PowerShell continuar recusando o script", "Em parte dos computadores o bloqueio não cede nem depois disso: ou o arquivo ainda está marcado como “vindo da internet”, ou a política de execução está fixada pela instituição e não aceita ser alterada. A sequência de dois comandos abaixo resolve os dois casos de uma vez, e foi a que funcionou nos testes. Execute-a na pasta do projeto:"),
+  ...Code([
+    "Unblock-File -Path .\\lab.ps1",
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\lab.ps1 up",
+  ]),
+  P("O primeiro comando tira a marca de origem do arquivo. O segundo executa o script ignorando a política **apenas naquela execução**, sem alterar nenhuma configuração do Windows. Nas vezes seguintes, repita só a segunda linha, trocando `up` pelo comando desejado — por exemplo `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\lab.ps1 aula 10`. Cada um desses bloqueios está explicado em separado no capítulo 9."),
   H2("2.3 macOS"),
   Num("Baixe e instale o Docker Desktop pelo guia oficial [Docker Desktop para Mac](https://docs.docker.com/desktop/setup/install/mac-install/), escolhendo o instalador do seu chip (Apple Silicon ou Intel). Arraste o ícone para a pasta Aplicativos e abra-o.", "steps2"),
   Num("Em **Settings > Resources**, mova o controle de memória para pelo menos 6 GB (10 GB se o Mac tiver 16 GB ou mais) e clique em “Apply”.", "steps2"),
@@ -415,6 +421,14 @@ const faq = [
   H2("9.1 Políticas e permissões do Windows"),
   P("Este é o grupo que gera mais dúvida, e nada aqui é defeito da sandbox: o Windows bloqueia, por padrão, arquivos baixados da internet e scripts sem assinatura digital. São proteções do sistema que você libera uma única vez."),
 
+  H3("Atalho: a sequência que destrava o lab.ps1 em qualquer computador"),
+  P("Se você só quer que funcione, sem entender cada bloqueio, execute estes dois comandos no PowerShell, dentro da pasta do projeto:"),
+  ...Code([
+    "Unblock-File -Path .\\lab.ps1",
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\lab.ps1 up",
+  ]),
+  P("O primeiro tira a marca de “arquivo vindo da internet”. O segundo executa o script ignorando a política de execução **apenas naquela janela**, sem mudar nenhuma configuração do Windows. Depois é só trocar o `up` pelo comando que você quiser: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\lab.ps1 aula 10`. As perguntas a seguir explicam cada bloqueio em separado, para quem quiser entender o que está acontecendo."),
+
   H3("Aparece “não é possível carregar o arquivo … porque a execução de scripts foi desabilitada neste sistema”"),
   P("O Windows vem configurado para não executar nenhum script do PowerShell. Execute uma única vez o comando abaixo na mesma janela, responda `S` e repita o `.\\lab.ps1 up`. Ele vale somente para o seu usuário e não pede senha de administrador."),
   ...Code(["Set-ExecutionPolicy -Scope CurrentUser RemoteSigned"]),
@@ -423,11 +437,12 @@ const faq = [
   P("O arquivo veio da internet e o Windows o marcou como “de outro computador”. A política `RemoteSigned` recusa justamente scripts baixados que não tenham assinatura digital — é o caso dos nossos. O melhor caminho é desbloquear o **ZIP antes de extrair**: botão direito no arquivo baixado, **Propriedades**, e na parte de baixo da aba **Geral** marque **Desbloquear** e clique em OK. Se já extraiu, abra o PowerShell na pasta do projeto e execute:"),
   ...Code(["Get-ChildItem -Recurse | Unblock-File"]),
   P("Esse comando só remove a marca de origem dos arquivos que você acabou de baixar. Ele não altera o conteúdo deles nem desliga nenhuma proteção do Windows."),
+  P("Se mesmo depois de desbloquear o arquivo o PowerShell continuar recusando, a política do seu computador está fixada pela instituição — veja a pergunta seguinte."),
 
   H3("O Set-ExecutionPolicy responde que “a configuração é substituída por uma política definida em um escopo mais específico”"),
   P("O computador é gerenciado por uma empresa, escola ou órgão público, e a política está fixada por Diretiva de Grupo. Confirme com `Get-ExecutionPolicy -List`: se a linha `MachinePolicy` ou `UserPolicy` mostrar algo diferente de `Undefined`, você não consegue alterar isso sem o setor de TI. Há duas saídas que não dependem de ninguém:"),
   Bullet("Não usar o `lab.ps1` e chamar o Docker diretamente — os comandos equivalentes estão na pergunta seguinte."),
-  Bullet("Executar o script apenas nesta janela, sem mudar nada no sistema: `powershell -ExecutionPolicy Bypass -File .\\lab.ps1 up`."),
+  Bullet("Executar o script apenas nesta janela, sem mudar nada no sistema: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\lab.ps1 up`."),
 
   H3("Como uso a sandbox sem o lab.ps1 ou o lab.sh?"),
   P("Os dois scripts só economizam digitação: tudo que eles fazem são comandos do `docker compose`. Na pasta do projeto, estes são os equivalentes, iguais no Windows, no macOS e no Linux:"),
