@@ -1,6 +1,6 @@
 # Aula 7 — Pig e Oozie
 
-**Preparar a sandbox:** `.\lab.ps1 aula 7` (Windows) ou `./lab.sh aula 7`.
+**Preparar a sandbox:** `.\lab.cmd aula 7` (Windows) ou `./lab.sh aula 7`.
 Liga ZooKeeper, HDFS, YARN, MapReduce2, Hive (com WebHCat, usado pelo Pig View) e Oozie.
 Se a máquina tiver só 8 GB e o objetivo for apenas o Pig, use `aula 7a` (sem Oozie).
 

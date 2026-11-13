@@ -6,6 +6,7 @@ Esta página reúne o que o aluno não precisa: estrutura do repositório, const
 
 ```
 docker-compose.yml   sandbox + sidecars (mongo, cassandra)
+lab.cmd              ponto de entrada no Windows (chama o lab.ps1)
 lab.ps1 / lab.sh     atalhos no computador do aluno
 publish.ps1          publicação da imagem (registry ou arquivo .tar.gz)
 sandbox/             Dockerfile e scripts de build/runtime da imagem
@@ -25,7 +26,7 @@ Leva de 60 a 90 minutos e baixa cerca de 5 GB de RPMs do ODP e 3 GB de tarballs.
 
 ```powershell
 bash sandbox/build/prefetch.sh   # baixa os tarballs uma vez; evita os limites de taxa dos mirrors
-.\lab.ps1 build
+.\lab.cmd build
 ```
 
 Mudanças só em `sandbox/runtime/` reconstroem apenas o estágio final, em poucos minutos.

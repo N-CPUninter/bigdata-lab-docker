@@ -4,10 +4,10 @@ A aula 8 usa muitos serviços; em 8 GB não cabem todos ao mesmo tempo. Ela foi 
 
 | Perfil | Comando | O que liga | Temas |
 |---|---|---|---|
-| 8a | `.\lab.ps1 aula 8a` | ZK, HDFS, YARN, MapReduce2, Hive | Hive, Sqoop + MariaDB, mrjob, Pig/Oozie (iguais à aula 7) |
-| 8b | `.\lab.ps1 aula 8b` | ZK, HDFS, YARN, MapReduce2, HBase (+ Phoenix Query Server) | HBase, Phoenix, Pig com HBaseStorage |
-| 8c | `.\lab.ps1 nosql` e `.\lab.ps1 aula 8c` | ZK, HDFS + containers Mongo e Cassandra | MongoDB, Cassandra, Spark 2 |
-| 8d | `.\lab.ps1 nosql` e `.\lab.ps1 aula 8d` | ZK, HDFS, Hive (metastore) + Mongo/Cassandra | Drill, Presto |
+| 8a | `.\lab.cmd aula 8a` | ZK, HDFS, YARN, MapReduce2, Hive | Hive, Sqoop + MariaDB, mrjob, Pig/Oozie (iguais à aula 7) |
+| 8b | `.\lab.cmd aula 8b` | ZK, HDFS, YARN, MapReduce2, HBase (+ Phoenix Query Server) | HBase, Phoenix, Pig com HBaseStorage |
+| 8c | `.\lab.cmd nosql` e `.\lab.cmd aula 8c` | ZK, HDFS + containers Mongo e Cassandra | MongoDB, Cassandra, Spark 2 |
+| 8d | `.\lab.cmd nosql` e `.\lab.cmd aula 8d` | ZK, HDFS, Hive (metastore) + Mongo/Cassandra | Drill, Presto |
 
 ## 8a — Hive
 
@@ -62,7 +62,7 @@ hbase shell
 No HDP o Mongo era instalado como serviço do Ambari (`mongo-ambari`, repo morto) e o Cassandra via `yum install dsc30` (repo morto). Aqui são dois containers oficiais que compartilham a rede da sandbox: continuam respondendo em `127.0.0.1`, então `MongoSpark.py` e `CassandraSpark.py` rodam **sem alteração**.
 
 ```powershell
-.\lab.ps1 nosql        # sobe mongo:4.4 e cassandra:3.11 (no host)
+.\lab.cmd nosql        # sobe mongo:4.4 e cassandra:3.11 (no host)
 ```
 Dentro da sandbox:
 ```bash

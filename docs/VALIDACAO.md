@@ -27,7 +27,7 @@ Não testados automaticamente (fluxo manual do roteiro, tarballs pré-baixados e
 ## Como repetir
 
 ```powershell
-.\lab.ps1 up
+.\lab.cmd up
 bash tests/ci.sh aula10 aula07 aula08 aula09 aula12 trabalho   # Git Bash / WSL; leva ~1h30
 ```
 `tests/smoke/trabalho.sh` só roda se `data/imdb-reviews-pt-br.csv` existir.

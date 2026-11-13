@@ -19,7 +19,7 @@ O notebook baixa o dataset, instala o PySpark e cria a `SparkSession`; você pre
 
 ## Opção B — Sandbox Docker
 
-**Preparar:** `.\lab.ps1 aula trabalho` (liga ZooKeeper e HDFS, para o upload pelo Files View).
+**Preparar:** `.\lab.cmd aula trabalho` (liga ZooKeeper e HDFS, para o upload pelo Files View).
 
 ### 1. Colocar o dataset na sandbox
 

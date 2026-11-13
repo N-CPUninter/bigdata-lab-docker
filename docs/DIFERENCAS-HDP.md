@@ -22,5 +22,5 @@
 | Ligar serviços | Ambari > Service Actions > Start (60 min para tudo) | `lab aula <perfil>` liga só os da aula (ou pelo Ambari, igual ao vídeo) |
 | Python | 2.7 | 3.9 (e 3.7 para o Spark 2) |
 | Boot | 30–60 min (VirtualBox), 12 h (Apple Silicon/QEMU) | 2–4 min |
-| Estado | dentro do disco da VM | volumes Docker (`docker volume ls`), apagáveis com `lab.ps1 reset` |
+| Estado | dentro do disco da VM | volumes Docker (`docker volume ls`), apagáveis com `lab.cmd reset` |
 | Ambari Metrics, Ranger, Knox, Atlas, NiFi | presentes (pesados) | não instalados (não são usados nas aulas) |

@@ -13,11 +13,13 @@ Respostas curtas para as dúvidas mais comuns, na ordem em que elas costumam apa
 
 ## 1. Políticas e permissões do Windows
 
-Este é o grupo que gera mais dúvida, e nada aqui é defeito da sandbox: o Windows bloqueia, por padrão, arquivos baixados da internet e scripts sem assinatura digital. São proteções do sistema que você libera uma única vez.
+Este é o grupo que gera mais dúvida, e nada aqui é defeito da sandbox: o Windows bloqueia, por padrão, arquivos baixados da internet e scripts sem assinatura digital.
 
-### Atalho: a sequência que destrava o `lab.ps1` em qualquer computador
+**Usando o `.\lab.cmd`, como manda o guia, nenhum desses bloqueios aparece** — ele existe exatamente para evitá-los, e nada precisa ser alterado nas configurações do Windows. As perguntas abaixo valem para quem prefere chamar o `lab.ps1` diretamente, ou encontra essas mensagens em outro contexto.
 
-Se você só quer que funcione, sem entender cada bloqueio, execute estes dois comandos no PowerShell, dentro da pasta do projeto:
+### Prefiro chamar o `lab.ps1` diretamente. Como destravo?
+
+Execute estes dois comandos no PowerShell, dentro da pasta do projeto:
 
 ```powershell
 Unblock-File -Path .\lab.ps1
@@ -31,7 +33,7 @@ O primeiro tira a marca de "arquivo vindo da internet". O segundo executa o scri
 
 ### Aparece "não é possível carregar o arquivo … porque a execução de scripts foi desabilitada neste sistema"
 
-O Windows vem configurado para não executar nenhum script do PowerShell. Execute uma única vez o comando abaixo na mesma janela, responda `S` e repita o `.\lab.ps1 up`. Ele vale somente para o seu usuário e não pede senha de administrador.
+O Windows vem configurado para não executar nenhum script do PowerShell. Execute uma única vez o comando abaixo na mesma janela, responda `S` e repita o `.\lab.cmd up`. Ele vale somente para o seu usuário e não pede senha de administrador.
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
@@ -58,9 +60,9 @@ O computador é gerenciado por uma empresa, escola ou órgão público, e a pol�
 - Não usar o `lab.ps1` e chamar o Docker diretamente — veja a pergunta seguinte.
 - Executar o script apenas nesta janela, sem mudar nada no sistema: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\lab.ps1 up`.
 
-### Como uso a sandbox sem o `lab.ps1` ou o `lab.sh`?
+### Como uso a sandbox sem o `lab.cmd`, o `lab.ps1` ou o `lab.sh`?
 
-Os dois scripts só economizam digitação: tudo que eles fazem são comandos do `docker compose`. Na pasta do projeto, estes são os equivalentes, iguais no Windows, no macOS e no Linux:
+Os scripts só economizam digitação: tudo que eles fazem são comandos do `docker compose`. Na pasta do projeto, estes são os equivalentes, iguais no Windows, no macOS e no Linux:
 
 ```bash
 docker compose up -d                          # subir a sandbox
@@ -144,7 +146,7 @@ Veja quanto o Docker está ocupando com `docker system df` e limpe o que não es
 
 ### Como sei se estou com a versão mais nova da sandbox?
 
-Na pasta do projeto, `docker compose pull` baixa a versão publicada mais recente; depois `.\lab.ps1 up` (ou `./lab.sh up`) sobe com ela. Seus dados ficam em volumes do Docker e sobrevivem à atualização.
+Na pasta do projeto, `docker compose pull` baixa a versão publicada mais recente; depois `.\lab.cmd up` (ou `./lab.sh up`) sobe com ela. Seus dados ficam em volumes do Docker e sobrevivem à atualização.
 
 ### Funciona no Windows 10 ou 11 Home?
 
@@ -160,7 +162,7 @@ Não, fora do primeiro download. Só precisam de rede as aulas que buscam dados 
 
 ### `localhost:8080` não abre logo depois do `up`
 
-Na primeira subida o Ambari leva de dois a quatro minutos para responder. O comando `up` espera por ele e só então mostra os endereços de acesso; se você abriu o navegador antes disso, atualize a página. Passados cinco minutos, veja `.\lab.ps1 logs` (ou `./lab.sh logs`).
+Na primeira subida o Ambari leva de dois a quatro minutos para responder. O comando `up` espera por ele e só então mostra os endereços de acesso; se você abriu o navegador antes disso, atualize a página. Passados cinco minutos, veja `.\lab.cmd logs` (ou `./lab.sh logs`).
 
 ### Quais são os usuários e senhas?
 
@@ -188,11 +190,11 @@ Troque o número do lado esquerdo no `docker-compose.yml` (`"8081:8080"`), suba 
 
 ### O comando da aula falha com "Connection refused", fica preso ou diz que o HDFS está em safe mode
 
-Os serviços ainda não estão de pé. O `up` liga apenas o Ambari; é o `aula <perfil>` que liga os serviços daquela aula, e ele termina escrevendo `PRONTO em Xm00s`. Espere essa mensagem antes de digitar qualquer comando da aula, abrir o SSH ou as interfaces web. Para conferir a qualquer momento, use `lab status` dentro da sandbox ou `.\lab.ps1 status` no seu computador.
+Os serviços ainda não estão de pé. O `up` liga apenas o Ambari; é o `aula <perfil>` que liga os serviços daquela aula, e ele termina escrevendo `PRONTO em Xm00s`. Espere essa mensagem antes de digitar qualquer comando da aula, abrir o SSH ou as interfaces web. Para conferir a qualquer momento, use `lab status` dentro da sandbox ou `.\lab.cmd status` no seu computador.
 
 ### Esqueci qual perfil está ligado
 
-`.\lab.ps1 status` (ou `./lab.sh status`) lista os serviços em pé. No Ambari, a mesma informação aparece na lista de serviços da esquerda: tudo verde significa pronto.
+`.\lab.cmd status` (ou `./lab.sh status`) lista os serviços em pé. No Ambari, a mesma informação aparece na lista de serviços da esquerda: tudo verde significa pronto.
 
 ### Posso trocar de aula sem desligar tudo?
 
@@ -232,7 +234,7 @@ Sim, usando um perfil por vez e o perfil de memória `8g` (`lab mem 8g`). O que 
 
 ### Posso fechar o Docker Desktop e continuar usando a sandbox?
 
-Não: ele é o motor que roda a sandbox. Para liberar o computador sem perder nada, execute `.\lab.ps1 down` (ou `./lab.sh down`) e só depois feche o Docker Desktop.
+Não: ele é o motor que roda a sandbox. Para liberar o computador sem perder nada, execute `.\lab.cmd down` (ou `./lab.sh down`) e só depois feche o Docker Desktop.
 
 ---
 

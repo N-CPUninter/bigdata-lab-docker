@@ -1,14 +1,15 @@
-<#
+﻿<#
 .SYNOPSIS
-  Atalhos para a sandbox Big Data (Windows / PowerShell).
+  Atalhos para a sandbox Big Data (Windows). Chame pelo lab.cmd, que evita o
+  bloqueio de scripts .ps1 baixados da internet: .\lab.cmd up
 .EXAMPLE
-  .\lab.ps1 up            # sobe a sandbox
-  .\lab.ps1 aula 7        # prepara a aula 7 (liga só os serviços necessários)
-  .\lab.ps1 shell         # abre um terminal como maria_dev dentro da sandbox
-  .\lab.ps1 status
-  .\lab.ps1 nosql         # sobe MongoDB + Cassandra (aulas 8c/8d)
-  .\lab.ps1 down          # para tudo (dados ficam nos volumes)
-  .\lab.ps1 reset         # apaga TUDO (volumes) e volta ao estado inicial
+  .\lab.cmd up            # sobe a sandbox
+  .\lab.cmd aula 7        # prepara a aula 7 (liga só os serviços necessários)
+  .\lab.cmd shell         # abre um terminal como maria_dev dentro da sandbox
+  .\lab.cmd status
+  .\lab.cmd nosql         # sobe MongoDB + Cassandra (aulas 8c/8d)
+  .\lab.cmd down          # para tudo (dados ficam nos volumes)
+  .\lab.cmd reset         # apaga TUDO (volumes) e volta ao estado inicial
 #>
 param(
   [Parameter(Position = 0)] [string] $Command = "help",
@@ -26,7 +27,7 @@ switch ($Command) {
     Write-Host "Aguardando o Ambari responder (2 a 4 minutos na primeira vez)..."
     Invoke-Sandbox @("wait-ambari"); Invoke-Sandbox @("urls")
     Write-Host ""
-    Write-Host "Ambari no ar. Proximo passo: .\lab.ps1 aula <perfil>   (ex.: aula 10, aula trabalho, aula 7)"
+    Write-Host "Ambari no ar. Proximo passo: .\lab.cmd aula <perfil>   (ex.: aula 10, aula trabalho, aula 7)"
     Write-Host "Espere a mensagem PRONTO desse comando antes de usar o terminal, o SSH ou os comandos das aulas."
   }
   "down"   { docker compose --profile nosql down }

@@ -14,7 +14,7 @@
    ```
    Para 16 GB de RAM ou mais use `memory=10GB`. Salve com "Tipo: Todos os arquivos" para não virar `.wslconfig.txt`. Depois rode `wsl --shutdown` e abra o Docker Desktop de novo. Referência: [Configurações do WSL](https://learn.microsoft.com/pt-br/windows/wsl/wsl-config).
 5. Baixe o ZIP do projeto pela plataforma da disciplina ou em [github.com/N-CPUninter/bigdata-lab-docker](https://github.com/N-CPUninter/bigdata-lab-docker) (botão verde **Code > Download ZIP**) e extraia (botão direito > Extrair Tudo) em uma pasta **sem acentos e sem espaços** (ex.: `C:\bigdata-lab`).
-6. Abra a pasta no Explorador, digite `powershell` na barra de endereço e Enter; então `.\lab.ps1 up`. Se o Windows bloquear o script: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+6. Abra a pasta no Explorador, digite `powershell` na barra de endereço e Enter; então `.\lab.cmd up`. Se o Windows bloquear o script: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ## macOS
 
@@ -30,9 +30,9 @@
 ## Primeira subida
 
 - A imagem tem ~8 GB; o download depende da sua internet.
-- Na primeira vez o Ambari leva 2–4 minutos para responder; `.\lab.ps1 up` espera por isso.
-- Depois, `.\lab.ps1 aula <perfil>`; o Ambari mostra o progresso em "Background Operations".
+- Na primeira vez o Ambari leva 2–4 minutos para responder; `.\lab.cmd up` espera por isso.
+- Depois, `.\lab.cmd aula <perfil>`; o Ambari mostra o progresso em "Background Operations".
 
 ## Atualizar
 
-`docker compose pull` e depois `.\lab.ps1 up`. Os dados (HDFS, bancos, home da `maria_dev`) ficam em volumes e sobrevivem à atualização.
+`docker compose pull` e depois `.\lab.cmd up`. Os dados (HDFS, bancos, home da `maria_dev`) ficam em volumes e sobrevivem à atualização.

@@ -19,7 +19,7 @@ A VM HDP 2.6.5 precisava de 8 GB só para ela (ou seja, um computador de 16 GB).
 
 Com 8 GB no computador: `.wslconfig` com `memory=6GB` e `swap=6GB` (Windows) ou 6 GB no Docker Desktop (macOS). Os perfis 7/8a/8d ficam lentos mas funcionam; feche o navegador com muitas abas.
 
-Com 16 GB ou mais: dê 10 GB ao Docker e use `.\lab.ps1 mem 16g` (Linux/macOS: `./lab.sh mem 16g`). Os heaps ficam maiores e os jobs mais rápidos; o perfil é o mesmo para 16, 32 ou 64 GB, não precisa ajustar nada além disso.
+Com 16 GB ou mais: dê 10 GB ao Docker e use `.\lab.cmd mem 16g` (Linux/macOS: `./lab.sh mem 16g`). Os heaps ficam maiores e os jobs mais rápidos; o perfil é o mesmo para 16, 32 ou 64 GB, não precisa ajustar nada além disso.
 
 ## Diferenças entre `8g` e `16g` além dos heaps
 
@@ -41,7 +41,7 @@ Medição real do perfil 7 após 12 h ligado (antes deste ajuste): container em 
 
 Medição real (perfil 7, `8g`): logo após ligar, ~5,4 GB; depois de ~24 h ligado sem uso, 7,0 GB (o limite do container), CPU alta e Ambari sem responder. Os processos Java (Oozie, HiveServer2, Metastore) crescem lentamente com o tempo mesmo ociosos, e o cache de página do HDFS conta no limite do container.
 
-Regra prática: ao terminar a sessão de estudo rode `lab aula none` (para todos os serviços, mantém o Ambari) ou `.\lab.ps1 down` (para o container; os dados ficam nos volumes). Se o Ambari deixar de responder (`.\lab.ps1 status` trava), `docker restart sandbox-hdp` resolve em ~3 min sem perder nada.
+Regra prática: ao terminar a sessão de estudo rode `lab aula none` (para todos os serviços, mantém o Ambari) ou `.\lab.cmd down` (para o container; os dados ficam nos volumes). Se o Ambari deixar de responder (`.\lab.cmd status` trava), `docker restart sandbox-hdp` resolve em ~3 min sem perder nada.
 
 ## Sinais de falta de memória
 

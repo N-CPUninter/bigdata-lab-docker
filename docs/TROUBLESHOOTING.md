@@ -2,8 +2,8 @@
 
 Dúvidas em forma de pergunta, com mais contexto, estão no [FAQ](FAQ.md).
 
-**`.\lab.ps1` não roda ("execução de scripts foi desabilitada")**
-`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` no PowerShell, uma vez.
+**Chamei o `.\lab.ps1` direto e ele não roda ("execução de scripts foi desabilitada")**
+Use o `.\lab.cmd`, que não passa pela política de execução. Para destravar o `.ps1`: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` no PowerShell, uma vez.
 
 **"O arquivo lab.ps1 não está assinado digitalmente"**
 O ZIP veio da internet e o Windows marcou os arquivos. Desbloqueie o ZIP antes de extrair (botão direito > Propriedades > Desbloquear) ou, se já extraiu, rode na pasta do projeto: `Get-ChildItem -Recurse | Unblock-File`.
@@ -45,10 +45,10 @@ Ela é `admin`. Se mudou e perdeu: `ambari-admin-password-reset` dentro da sandb
 `SPARK_MAJOR_VERSION=2` usa o Python 3.7 e `=3` o Python 3.9 automaticamente em shells de login. Em `docker compose exec` sem `-l`, rode `source /etc/profile.d/spark-python.sh`.
 
 **Mongo/Cassandra não conectam em 127.0.0.1**
-Os sidecars precisam estar de pé: `.\lab.ps1 nosql` (ou `docker compose --profile nosql up -d`). Cassandra leva ~1 minuto para aceitar conexões.
+Os sidecars precisam estar de pé: `.\lab.cmd nosql` (ou `docker compose --profile nosql up -d`). Cassandra leva ~1 minuto para aceitar conexões.
 
 **Mac com chip Apple está muito lento**
 Confirme "Use Rosetta for x86_64/amd64 emulation" no Docker Desktop. Prefira os perfis leves (10/11/12/trabalho) e, para o Trabalho, o [Colab](https://colab.research.google.com/github/N-CPUninter/Big_Data/blob/main/trabalho_big_data.ipynb) continua sendo a opção mais leve.
 
 **Quero começar do zero**
-`.\lab.ps1 reset` (apaga HDFS, bancos e o home da `maria_dev`).
+`.\lab.cmd reset` (apaga HDFS, bancos e o home da `maria_dev`).

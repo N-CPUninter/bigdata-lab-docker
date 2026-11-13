@@ -1,6 +1,6 @@
 # Aulas 10 e 11 — PySpark (RDD, DataFrame, Spark SQL, MLlib)
 
-**Preparar:** `.\lab.ps1 aula 10` — liga só ZooKeeper e HDFS. O Spark roda em modo **local**, mas, como no HDP, `sc.textFile("u.data")` lê do **HDFS** (`/user/maria_dev/u.data`). No vídeo o professor sobe `u.data`, `u.item` e `customer-orders.csv` pelo Files View; na sandbox eles já estão lá (`hdfs dfs -ls`), e você pode repetir o upload para praticar. Os `open("u.item")` do Python leem o arquivo **local** da pasta do script. Para ler um arquivo local pelo Spark sem HDFS: `sc.textFile("file:///home/maria_dev/aulas/aula10/01-RatingsCounter/u.data")`.
+**Preparar:** `.\lab.cmd aula 10` — liga só ZooKeeper e HDFS. O Spark roda em modo **local**, mas, como no HDP, `sc.textFile("u.data")` lê do **HDFS** (`/user/maria_dev/u.data`). No vídeo o professor sobe `u.data`, `u.item` e `customer-orders.csv` pelo Files View; na sandbox eles já estão lá (`hdfs dfs -ls`), e você pode repetir o upload para praticar. Os `open("u.item")` do Python leem o arquivo **local** da pasta do script. Para ler um arquivo local pelo Spark sem HDFS: `sc.textFile("file:///home/maria_dev/aulas/aula10/01-RatingsCounter/u.data")`.
 
 Os scripts são os originais. Na sandbox há dois Sparks, como no HDP:
 

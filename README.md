@@ -82,14 +82,16 @@ Se o seu computador não dá conta (menos de 8 GB, ou um Mac antigo), a Atividad
    - *Linux:* botão direito dentro da pasta, **Abrir no Terminal**.
 4. **Suba a sandbox:**
    ```powershell
-   .\lab.ps1 up      # Windows
+   .\lab.cmd up      # Windows
    ```
    ```bash
    ./lab.sh up       # macOS e Linux
    ```
    Na primeira vez o Docker baixa a imagem, que tem vários GB: pode levar de vinte minutos a algumas horas, conforme a sua internet. Depois disso, subir leva cerca de um minuto.
 
-Se o Windows responder *"a execução de scripts foi desabilitada neste sistema"*, rode uma única vez o comando abaixo, responda `S` e repita o `.\lab.ps1 up`:
+Repare no `.\` do começo e na terminação `.cmd`: assim o comando funciona tanto no PowerShell quanto no Prompt de Comando. O `lab.cmd` é um atalho de três linhas que chama o `lab.ps1`, onde está toda a lógica; ele existe porque o Windows bloqueia por padrão os scripts `.ps1` baixados da internet, e chamar o `.\lab.ps1` diretamente falha na primeira vez em boa parte dos computadores. Pelo `.\lab.cmd` esse bloqueio não aparece e nada precisa ser mudado nas configurações do Windows.
+
+Se você preferir chamar o `lab.ps1` diretamente e o Windows responder *"a execução de scripts foi desabilitada neste sistema"*, rode uma única vez o comando abaixo, responda `S` e tente de novo:
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
@@ -102,19 +104,19 @@ Quando terminar, o comando mostra a lista de endereços e a frase *"Ambari no ar
 
 | Windows | macOS e Linux | O que faz |
 |---|---|---|
-| `.\lab.ps1 up` | `./lab.sh up` | Sobe a sandbox e espera o Ambari responder |
-| `.\lab.ps1 aula 7` | `./lab.sh aula 7` | Prepara a aula 7: liga só os serviços dela |
-| `.\lab.ps1 shell` | `./lab.sh shell` | Abre um terminal **dentro** da sandbox |
+| `.\lab.cmd up` | `./lab.sh up` | Sobe a sandbox e espera o Ambari responder |
+| `.\lab.cmd aula 7` | `./lab.sh aula 7` | Prepara a aula 7: liga só os serviços dela |
+| `.\lab.cmd shell` | `./lab.sh shell` | Abre um terminal **dentro** da sandbox |
 
 O **perfil** é o que vem depois da palavra `aula`. Ele diz quais serviços ligar. Pode ser o número da aula, uma parte de uma aula grande, a palavra `trabalho` ou a palavra `none`:
 
 | Windows | macOS e Linux | Resultado |
 |---|---|---|
-| `.\lab.ps1 aula 10` | `./lab.sh aula 10` | Aula 10 (PySpark): liga ZooKeeper e HDFS |
-| `.\lab.ps1 aula 11` | `./lab.sh aula 11` | Aula 11: os mesmos serviços da 10 |
-| `.\lab.ps1 aula trabalho` | `./lab.sh aula trabalho` | Atividade Prática: ZooKeeper e HDFS |
-| `.\lab.ps1 aula 8a` | `./lab.sh aula 8a` | Primeira parte da aula 8: HDFS, YARN, MapReduce2 e Hive |
-| `.\lab.ps1 aula none` | `./lab.sh aula none` | Desliga todos os serviços; só o Ambari fica no ar |
+| `.\lab.cmd aula 10` | `./lab.sh aula 10` | Aula 10 (PySpark): liga ZooKeeper e HDFS |
+| `.\lab.cmd aula 11` | `./lab.sh aula 11` | Aula 11: os mesmos serviços da 10 |
+| `.\lab.cmd aula trabalho` | `./lab.sh aula trabalho` | Atividade Prática: ZooKeeper e HDFS |
+| `.\lab.cmd aula 8a` | `./lab.sh aula 8a` | Primeira parte da aula 8: HDFS, YARN, MapReduce2 e Hive |
+| `.\lab.cmd aula none` | `./lab.sh aula none` | Desliga todos os serviços; só o Ambari fica no ar |
 
 **Espere a mensagem `PRONTO`.** Ligar os serviços leva de um a seis minutos. Enquanto isso o comando mostra o que está ligando e, a cada trinta segundos, o tempo decorrido. No final aparece uma faixa assim:
 
@@ -131,12 +133,12 @@ Outros comandos úteis:
 
 | Windows | macOS e Linux | O que faz |
 |---|---|---|
-| `.\lab.ps1 status` | `./lab.sh status` | Mostra quais serviços estão ligados e quanta memória estão usando |
-| `.\lab.ps1 nosql` | `./lab.sh nosql` | Sobe o MongoDB e o Cassandra (aulas 8c e 8d) |
-| `.\lab.ps1 stop-all` | `./lab.sh stop-all` | Desliga todos os serviços, mantendo a sandbox no ar |
-| `.\lab.ps1 down` | `./lab.sh down` | Para a sandbox; seus arquivos continuam salvos |
-| `.\lab.ps1 mem 16g` | `./lab.sh mem 16g` | Perfil de memória para máquinas com 16 GB ou mais |
-| `.\lab.ps1 reset` | `./lab.sh reset` | Apaga tudo e volta ao estado inicial. Pede confirmação |
+| `.\lab.cmd status` | `./lab.sh status` | Mostra quais serviços estão ligados e quanta memória estão usando |
+| `.\lab.cmd nosql` | `./lab.sh nosql` | Sobe o MongoDB e o Cassandra (aulas 8c e 8d) |
+| `.\lab.cmd stop-all` | `./lab.sh stop-all` | Desliga todos os serviços, mantendo a sandbox no ar |
+| `.\lab.cmd down` | `./lab.sh down` | Para a sandbox; seus arquivos continuam salvos |
+| `.\lab.cmd mem 16g` | `./lab.sh mem 16g` | Perfil de memória para máquinas com 16 GB ou mais |
+| `.\lab.cmd reset` | `./lab.sh reset` | Apaga tudo e volta ao estado inicial. Pede confirmação |
 
 ---
 
@@ -171,7 +173,7 @@ Cada aula tem uma pasta em `aulas/` com um arquivo `GUIA.md` que compara, linha 
 ### Aula 7 — Pig e Oozie · [guia completo](aulas/aula07/GUIA.md)
 
 ```powershell
-.\lab.ps1 aula 7        # ./lab.sh aula 7      (ou "aula 7a", só Pig, mais leve)
+.\lab.cmd aula 7        # ./lab.sh aula 7      (ou "aula 7a", só Pig, mais leve)
 ```
 No terminal da sandbox:
 ```bash
@@ -191,10 +193,10 @@ A aula 8 usa muitas ferramentas, e ligar todas de uma vez não cabe em 8 GB. Por
 
 | Perfil | Comando | Conteúdo |
 |---|---|---|
-| 8a | `.\lab.ps1 aula 8a` | Hive, Sqoop com MariaDB, MapReduce com mrjob |
-| 8b | `.\lab.ps1 aula 8b` | HBase (e Pig lendo do HBase) |
-| 8c | `.\lab.ps1 nosql` e depois `.\lab.ps1 aula 8c` | MongoDB, Cassandra e Spark 2 |
-| 8d | `.\lab.ps1 nosql` e depois `.\lab.ps1 aula 8d` | Drill e Presto |
+| 8a | `.\lab.cmd aula 8a` | Hive, Sqoop com MariaDB, MapReduce com mrjob |
+| 8b | `.\lab.cmd aula 8b` | HBase (e Pig lendo do HBase) |
+| 8c | `.\lab.cmd nosql` e depois `.\lab.cmd aula 8c` | MongoDB, Cassandra e Spark 2 |
+| 8d | `.\lab.cmd nosql` e depois `.\lab.cmd aula 8d` | Drill e Presto |
 
 O **Hive View** também não existe mais. Use o `beeline` ou o Zeppelin, como explica o guia da aula. As tabelas `ratings` e `names` já estão criadas, no lugar do "Upload Table" que o vídeo mostra. O Phoenix é a única ferramenta do material que não funciona nesta versão; o guia explica o motivo e o que usar no lugar.
 
@@ -202,10 +204,10 @@ O **Hive View** também não existe mais. Use o `beeline` ou o Zeppelin, como ex
 
 | Perfil | Comando | Conteúdo |
 |---|---|---|
-| 9a | `.\lab.ps1 aula 9a` | Flume lendo do netcat e de uma pasta, gravando no HDFS |
-| 9b | `.\lab.ps1 aula 9b` | Kafka: criar tópico, produzir e consumir |
-| 9c | `.\lab.ps1 aula 9c` e, na sandbox, `lab storm start` | Storm, com a interface em [http://localhost:8744](http://localhost:8744) |
-| 9d | `.\lab.ps1 aula 9d` | Flink, com a interface em [http://localhost:8082](http://localhost:8082) |
+| 9a | `.\lab.cmd aula 9a` | Flume lendo do netcat e de uma pasta, gravando no HDFS |
+| 9b | `.\lab.cmd aula 9b` | Kafka: criar tópico, produzir e consumir |
+| 9c | `.\lab.cmd aula 9c` e, na sandbox, `lab storm start` | Storm, com a interface em [http://localhost:8744](http://localhost:8744) |
+| 9d | `.\lab.cmd aula 9d` | Flink, com a interface em [http://localhost:8082](http://localhost:8082) |
 
 Mudança mais visível em relação ao vídeo: os comandos do Kafka não aceitam mais `--zookeeper`; use `--bootstrap-server localhost:6667`. A lista completa de mudanças desse tipo está em [aulas/ERRATA.md](aulas/ERRATA.md).
 
@@ -214,7 +216,7 @@ Vários exercícios desta aula pedem **dois ou três terminais ao mesmo tempo** 
 ### Aulas 10 e 11 — PySpark · [guia completo](aulas/aula10/GUIA.md)
 
 ```powershell
-.\lab.ps1 aula 10       # ./lab.sh aula 10   (a aula 11 usa o mesmo perfil)
+.\lab.cmd aula 10       # ./lab.sh aula 10   (a aula 11 usa o mesmo perfil)
 ```
 ```bash
 cd ~/aulas/aula10/01-RatingsCounter && spark-submit ratings-counter.py
@@ -228,7 +230,7 @@ São as aulas mais leves: ligam apenas ZooKeeper e HDFS. Existem duas versões d
 ### Aula 12 — Spark Streaming · [guia completo](aulas/aula12/GUIA.md)
 
 ```powershell
-.\lab.ps1 aula 12       # ./lab.sh aula 12
+.\lab.cmd aula 12       # ./lab.sh aula 12
 ```
 Este exercício precisa de **três terminais**: um roda o Spark, outro roda o Flume, o terceiro copia arquivos para a pasta vigiada. O guia traz os três blocos prontos. É o único exercício que exige o Spark 2, porque o conector com o Flume não existe no Spark 3.
 
@@ -246,7 +248,7 @@ Este exercício precisa de **três terminais**: um roda o Spark, outro roda o Fl
 
 **Opção A — Colab.** Abra o [notebook da disciplina](https://colab.research.google.com/github/N-CPUninter/Big_Data/blob/main/trabalho_big_data.ipynb), faça **Arquivo > Salvar uma cópia no Drive** e preencha as funções de cada questão. Ele já baixa o dataset e instala o PySpark.
 
-**Opção B — Sandbox.** `.\lab.ps1 aula trabalho`, envie o CSV pelo Files View e rode `spark-submit`. O passo a passo detalhado está em [aulas/trabalho/GUIA.md](aulas/trabalho/GUIA.md), incluindo o script `verifica.sh`, que confere se os seus números batem com os esperados antes da entrega.
+**Opção B — Sandbox.** `.\lab.cmd aula trabalho`, envie o CSV pelo Files View e rode `spark-submit`. O passo a passo detalhado está em [aulas/trabalho/GUIA.md](aulas/trabalho/GUIA.md), incluindo o script `verifica.sh`, que confere se os seus números batem com os esperados antes da entrega.
 
 ---
 
@@ -255,8 +257,8 @@ Este exercício precisa de **três terminais**: um roda o Spark, outro roda o Fl
 Ao fim de cada sessão de estudo, rode:
 
 ```powershell
-.\lab.ps1 aula none     # desliga os serviços, mantém o Ambari
-.\lab.ps1 down          # para a sandbox inteira; nada é perdido
+.\lab.cmd aula none     # desliga os serviços, mantém o Ambari
+.\lab.cmd down          # para a sandbox inteira; nada é perdido
 ```
 
 Isso não é opcional. Os serviços Java vão ocupando mais memória com o tempo: depois de um dia inteiro ligados, mesmo sem uso, o perfil 7 chega ao limite e o computador fica lento. Detalhes e números medidos em [docs/MEMORIA.md](docs/MEMORIA.md).
@@ -268,13 +270,13 @@ Isso não é opcional. Os serviços Java vão ocupando mais memória com o tempo
 | Sintoma | O que fazer |
 |---|---|
 | `hdfs`, `hive` ou `spark-submit` dão erro de conexão | Os serviços ainda não terminaram de subir, ou você não rodou o `aula <perfil>`. Espere a faixa `PRONTO` e confira com `status` |
-| O Ambari não abre em `localhost:8080` | Veja `.\lab.ps1 logs`. Se outro programa já usa a porta 8080, troque-a no `docker-compose.yml` |
-| `.\lab.ps1` não roda no Windows | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, uma vez só |
+| O Ambari não abre em `localhost:8080` | Veja `.\lab.cmd logs`. Se outro programa já usa a porta 8080, troque-a no `docker-compose.yml` |
+| Chamei o `.\lab.ps1` direto e ele não roda | Use `.\lab.cmd`, que não esbarra na política de execução. Para destravar o `.ps1`: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, uma vez só |
 | "O arquivo lab.ps1 não está assinado digitalmente" | O ZIP veio da internet e ficou marcado. Na pasta do projeto: `Get-ChildItem -Recurse \| Unblock-File` |
 | O PowerShell recusa o `lab.ps1` mesmo depois de liberar a política | `Unblock-File -Path .\lab.ps1` e depois `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\lab.ps1 up`. Resolve a marca de origem e a política fixada pela instituição de uma vez |
 | O Docker Desktop diz que você não está no grupo `docker-users` | Um administrador precisa rodar `net localgroup docker-users "NOME-DO-PC\seu_usuario" /add`; depois saia e entre no Windows |
 | Tudo muito lento, computador travando | Reduza o `.wslconfig`, feche o navegador e use os perfis mais leves (`7a` no lugar de `7`) |
-| Quero começar do zero | `.\lab.ps1 reset` apaga HDFS, bancos e os arquivos criados dentro da sandbox |
+| Quero começar do zero | `.\lab.cmd reset` apaga HDFS, bancos e os arquivos criados dentro da sandbox |
 
 **Perguntas frequentes:** [docs/FAQ.md](docs/FAQ.md) — inclui as travas de política do Windows (execução de scripts, arquivos bloqueados, SmartScreen, firewall, portas reservadas, antivírus), que são o obstáculo mais comum na primeira instalação.
 

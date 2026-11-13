@@ -4,10 +4,10 @@ Perfis (cada um liga só o necessário):
 
 | Perfil | Comando | Liga |
 |---|---|---|
-| 9a Flume | `.\lab.ps1 aula 9a` | ZK, HDFS |
-| 9b Kafka | `.\lab.ps1 aula 9b` | ZK, Kafka |
-| 9c Storm | `.\lab.ps1 aula 9c` e, na sandbox, `lab storm start` | ZK + daemons do Storm |
-| 9d Flink | `.\lab.ps1 aula 9d` | nada (Flink é standalone) |
+| 9a Flume | `.\lab.cmd aula 9a` | ZK, HDFS |
+| 9b Kafka | `.\lab.cmd aula 9b` | ZK, Kafka |
+| 9c Storm | `.\lab.cmd aula 9c` e, na sandbox, `lab storm start` | ZK + daemons do Storm |
+| 9d Flink | `.\lab.cmd aula 9d` | nada (Flink é standalone) |
 | Spark Streaming | ver `aula12/GUIA.md` | — |
 
 Os temas de Hive/HBase/Mongo/Cassandra/Drill/Presto da aula 9 são os mesmos da aula 8 (`aula08/GUIA.md`).

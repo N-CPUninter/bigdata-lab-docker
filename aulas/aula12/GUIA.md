@@ -1,6 +1,6 @@
 # Aula 12 — Spark Streaming (Flume → Spark) e Structured Streaming
 
-**Preparar:** `.\lab.ps1 aula 12` — liga ZooKeeper e HDFS (o `spark.readStream.text("logs")` do Structured Streaming resolve para `/user/maria_dev/logs` no HDFS, como no vídeo; Flume e Spark rodam localmente).
+**Preparar:** `.\lab.cmd aula 12` — liga ZooKeeper e HDFS (o `spark.readStream.text("logs")` do Structured Streaming resolve para `/user/maria_dev/logs` no HDFS, como no vídeo; Flume e Spark rodam localmente).
 
 Este exercício exige **Spark 2** (`spark-streaming-flume` não existe no Spark 3). A sandbox mantém o Spark 2.4.8 justamente para isso.
 

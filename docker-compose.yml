@@ -1,6 +1,6 @@
 # Sandbox Big Data (UNINTER) — substituto da VM HDP 2.6.5
 # Uso básico:   docker compose up -d          (sobe a sandbox)
-#               .\lab.ps1 aula 7             (liga só os serviços da aula 7)
+#               .\lab.cmd aula 7             (liga só os serviços da aula 7)
 # NoSQL:        docker compose --profile nosql up -d   (Mongo + Cassandra para a aula 8c/8d)
 name: bigdata-lab
 
