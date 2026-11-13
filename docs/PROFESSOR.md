@@ -89,7 +89,9 @@ cd docs/guia-src && npm install docx@9      # só na primeira vez
 node build.js Guia-do-Aluno.docx
 ```
 
-A exportação para PDF usa o Word (COM), que também atualiza o sumário. O texto do guia fica em `build.js`; a formatação, em `lib.js`.
+A exportação para PDF usa o Word (COM), que também atualiza o sumário. O texto do guia fica em `build.js`; a formatação, em `lib.js`; a marca usada na capa e no cabeçalho, em `guia-src/assets/`.
+
+O guia é o **documento único** publicado na rota: ele reúne o conteúdo de todos os arquivos desta pasta, inclusive esta página (apêndice D) e a validação (capítulo 10). Ao alterar qualquer `.md` daqui, reflita a mudança em `build.js` e gere o DOCX e o PDF de novo, senão os dois divergem. A única exceção é o [TEXTOS-ROTA.md](TEXTOS-ROTA.md), que são os textos que apontam para o guia e não fazem sentido dentro dele.
 
 ## Textos para a rota e para a tutoria
 

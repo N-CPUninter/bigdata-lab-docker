@@ -22,7 +22,7 @@ Não testados automaticamente (fluxo manual do roteiro, tarballs pré-baixados e
 - **Spark2 History Server** (componente do Ambari) não sobe; nenhum perfil o usa. Spark 3 roda fora do Ambari (cliente puro), porque SPARK2 e SPARK3 não coexistem no mesmo cluster ODP.
 - **NameNode UI** é publicada em `localhost:9870` (o Windows reserva 50000–50959).
 - Cassandra 3.11 precisa de 1,5 GB (`mem_limit`); com 1 GB morre por OOM.
-- Imagem grande (~22 GB descompactada). O `dnf` traz plugins Ranger, Iceberg e Java 17 como dependências; Java 17 é usado pelo Storm.
+- Imagem grande (~16 GB de download, ~21 GB em disco). O `dnf` traz plugins Ranger, Iceberg e Java 17 como dependências; Java 17 é usado pelo Storm.
 
 ## Como repetir
 

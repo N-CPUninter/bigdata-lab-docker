@@ -2,32 +2,26 @@
 const fs = require("fs");
 const path = require("path");
 const L = require("./lib");
-const { d, FONT, MONO, BLUE, TEXT_W, PAGE_W, MARGIN, P, H1, H1n, H2, H3, Code, Bullet, Num, Note, TblS, Spacer, Break, runs } = L;
+const {
+  d, FONT, MONO, BLUE, GOLD, TEXT_W, PAGE_W, PAGE_H, MARGIN, MARGIN_V,
+  P, H1, H1n, H2, H3, Code, Bullet, Num, Note, TblS, Spacer, Break, runs,
+  Capa, Cabecalho, Rodape, Vazio, estilosTitulo,
+} = L;
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, TableOfContents, Header, Footer,
   PageNumber, LevelFormat, BorderStyle, ShadingType,
 } = d;
 
 const OUT = process.argv[2] || "Guia-do-Aluno.docx";
-const VERSAO = "1.0 — setembro de 2026";
+const VERSAO = "2.0 — novembro de 2026";
+const ANO = 2026;
 
 // ---------------------------------------------------------------- capa
-const capa = [
-  Spacer(2400),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "UNINTER — Ensino a Distância (EaD)", font: FONT, size: 26, color: "555555" })], spacing: { after: 120 } }),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Disciplina de Big Data", font: FONT, size: 28, color: "555555" })], spacing: { after: 900 } }),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Sandbox Big Data", font: FONT, size: 64, bold: true, color: BLUE })], spacing: { after: 160 } }),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Guia do Aluno", font: FONT, size: 44, color: BLUE })], spacing: { after: 400 } }),
-  new Paragraph({ alignment: AlignmentType.CENTER, border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: BLUE, space: 1 } }, children: [new TextRun({ text: " ", size: 8 })], spacing: { after: 400 } }),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Ambiente Hadoop completo em Docker para as aulas práticas 7 a 12 e para a Atividade Prática, em substituição à máquina virtual HDP 2.6.5.", font: FONT, size: 24, italics: true, color: "444444" })], spacing: { after: 2400 } }),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Versão " + VERSAO, font: FONT, size: 22, color: "555555" })] }),
-  new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Prof. Guilherme Ditzel Patriota", font: FONT, size: 22, color: "555555" })] }),
-  Break(),
-];
+const capa = Capa("Sandbox Big Data", "GUIA DO ALUNO", "AULAS PRÁTICAS 7 A 12", "Prof. MSc. Guilherme Ditzel Patriota", ANO);
 
 // ---------------------------------------------------------------- sumário
 const sumario = [
-  new Paragraph({ children: [new TextRun({ text: "Sumário", font: FONT, size: 34, bold: true, color: BLUE })], spacing: { after: 200 }, border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: BLUE, space: 4 } } }),
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 240 }, children: [new TextRun({ text: "SUMÁRIO", font: FONT, size: 32, bold: true, color: BLUE })] }),
   new TableOfContents("Sumário", { hyperlink: true, headingStyleRange: "1-2" }),
   P("Este sumário é atualizado automaticamente pelo Word. Se aparecer vazio, clique com o botão direito sobre ele e escolha “Atualizar campo”.", { run: { italics: true, color: "666666", size: 20 } }),
 ];
@@ -70,9 +64,9 @@ const instal = [
   ...TblS(["Item", "Mínimo", "Recomendado"], [
     ["Memória RAM", "8 GB", "16 GB ou mais"],
     ["Processador", "2 núcleos, 64 bits, com virtualização ativada", "4 núcleos ou mais"],
-    ["Espaço em disco livre", "40 GB (a imagem ocupa cerca de 22 GB)", "60 GB"],
+    ["Espaço em disco livre", "40 GB (a imagem ocupa cerca de 21 GB)", "60 GB"],
     ["Sistema operacional", "Windows 10/11 com WSL2, macOS 12 ou superior, Linux", "—"],
-    ["Internet", "Download único da imagem (vários GB)", "—"],
+    ["Internet", "Download único da imagem: cerca de 16 GB", "—"],
   ], [2, 3, 2]),
   P("Computadores Apple com chip M1, M2 ou M3 funcionam por emulação (Rosetta). A sandbox fica mais lenta nesses aparelhos, mas leva minutos para subir, e não as doze horas da máquina virtual antiga."),
   H2("2.2 Windows 10 e 11"),
@@ -381,7 +375,9 @@ const mem = [
     "Ao terminar a sessão de estudo, execute `lab aula none` (para todos os serviços e mantém o Ambari) ou `.\\lab.cmd down` / `./lab.sh down` (para o container; os dados ficam nos volumes).",
     "Se o Ambari deixar de responder (`.\\lab.cmd status` / `./lab.sh status` trava), execute `docker restart sandbox-hdp`. Em cerca de três minutos tudo volta, sem perda de dados.",
   ]),
-  H2("7.3 Sinais de falta de memória"),
+  H2("7.3 O que o comando `mem` muda por dentro"),
+  P("Os dois perfis são arquivos de configuração aplicados ao Ambari: eles definem o heap do NameNode, do DataNode, do ResourceManager, do NodeManager, do HiveServer2, do Metastore, do HBase, do Oozie e do ZooKeeper, o tamanho dos containers do YARN (`yarn.nodemanager.resource.memory-mb` e os limites de map, reduce e Tez) e a memória do driver e dos executores do Spark. O comando `lab mem 8g` ou `lab mem 16g` grava esses valores no Ambari; eles passam a valer na próxima vez que cada serviço for ligado, e o `lab aula` já faz isso."),
+  H2("7.4 Sinais de falta de memória"),
   Bullet("Um serviço fica vermelho no Ambari logo depois de ligar: veja `lab status` (coluna de memória por processo) e o log em `/var/log/<serviço>`."),
   Bullet("Mensagem `Container killed on request. Exit code is 137` em um job do YARN: aumente o `swap` no `.wslconfig` ou use um perfil menor (`7a` em vez de `7`)."),
   Bullet("O Docker Desktop trava o Windows: o valor de `memory` no `.wslconfig` está alto demais para a máquina."),
@@ -399,7 +395,7 @@ const prob = [
     ["`lab aula` falha com “requisição falhou”", "Repita o comando: o Ambari às vezes falha no primeiro start do NameNode após um restart. Persistindo, `lab stop-all` e tente de novo."],
     ["HDFS em “safe mode”", "Aguarde um minuto. Se continuar: `sudo -u hdfs hdfs dfsadmin -safemode leave` dentro da sandbox."],
     ["`Permission denied` ao gravar no HDFS", "Você está como `root`. Use `su - maria_dev` ou o terminal web com `maria_dev`."],
-    ["Esqueci a senha do `admin` do Ambari", "É `admin`. Se a trocou e perdeu: `ambari-admin-password-reset` dentro da sandbox, como root."],
+    ["Esqueci a senha do `admin` do Ambari", "É `admin`. Se a trocou e perdeu: `ambari-admin-password-reset` dentro da sandbox, como root. Em último caso, pelo banco: `psql -U ambari -h localhost ambari` (senha `bigdata`), tabela `user_authentication`."],
     ["Spark reclama da versão do Python", "Em shells de login a variável `SPARK_MAJOR_VERSION` escolhe o Python certo. Em um shell aberto por `docker exec` sem `-l`, execute `source /etc/profile.d/spark-python.sh`."],
     ["Mongo ou Cassandra não conectam em 127.0.0.1", "Os containers precisam estar de pé: `.\\lab.cmd nosql` (ou `./lab.sh nosql`). O Cassandra leva cerca de um minuto para aceitar conexões."],
     ["Mac com chip Apple está muito lento", "Confirme “Use Rosetta for x86_64/amd64 emulation” no Docker Desktop. Prefira os perfis leves (10, 11, 12, trabalho). Para a Atividade Prática o [Colab](https://colab.research.google.com/github/N-CPUninter/Big_Data/blob/main/trabalho_big_data.ipynb) continua sendo a opção mais leve."],
@@ -488,7 +484,7 @@ const faq = [
   P("Não. Feche a tela de login com **Skip** ou **Continue without signing in**. A imagem da sandbox é pública e baixa sem login."),
 
   H3("O download é muito grande e a conexão caiu no meio"),
-  P("A imagem tem cerca de 22 GB e é baixada **uma única vez**. Se a conexão cair, repita o comando: o Docker retoma de onde parou, camada por camada. Prefira rede por cabo ou um Wi-Fi estável, e evite redes com limite de dados."),
+  P("O download são cerca de 16 GB, feitos **uma única vez**; na sua máquina a imagem ocupa cerca de 21 GB. Se a conexão cair, repita o comando: o Docker retoma de onde parou, camada por camada. Prefira rede por cabo ou um Wi-Fi estável, e evite redes com limite de dados."),
 
   H3("“no space left on device” ou o Docker reclama de disco"),
   P("Veja quanto o Docker está ocupando com `docker system df` e limpe o que não está em uso com `docker system prune`. **Não** use `docker system prune -a --volumes`: isso apagaria a imagem da sandbox e os seus dados. No Windows o disco do Docker fica dentro do WSL2, normalmente na unidade `C:`; se o `C:` estiver cheio, é preciso liberar espaço nele."),
@@ -566,6 +562,35 @@ const faq = [
   P("O Colab desliga a máquina após algum tempo sem uso e apaga os arquivos baixados, mas **o código que você escreveu fica salvo no notebook**. Execute de novo as células do início (download, descompactação e `pip`) e siga de onde parou."),
 ];
 
+// ---------------------------------------------------------------- 10. validação
+const valid = [
+  H1("10. O que foi testado"),
+  P("Antes de a sandbox ser publicada, cada aula foi executada do começo ao fim em uma instalação nova, para garantir que os comandos dos roteiros funcionam como nos vídeos. Esta página registra o que passou, o que não foi testado de forma automática e o que se sabe que não funciona. Ela existe para que você saiba, diante de um problema, se encontrou um defeito conhecido ou algo novo."),
+  H2("10.1 Condições do teste"),
+  P("Última rodada em 21 de setembro de 2026, com a imagem `bigdata-sandbox:1.0.1` (Ambari 2.7.11.0.0-161 e ODP 1.2.4.0-108), subida **do zero**, com volumes novos, no Docker Desktop do Windows 11 com WSL2, container limitado a 7 GB e perfil de memória `8g`. Resultado: **30 verificações bem-sucedidas, nenhuma falha e uma pulada** (o Phoenix, explicado abaixo). Ao final de toda a bateria, o container ocupava 3,9 GB."),
+  H2("10.2 Resultado por aula"),
+  ...TblS(["Aula ou perfil", "O que o teste executa", "Resultado"], [
+    ["10 e 11", "`ratings-counter.py` no Spark 3 e no Spark 2, lendo `u.data` do HDFS; `spark-sql.py`; recomendação com ALS (`movie-recommendations-als.py 50`)", "Passou"],
+    ["7", "`ml-100k` no HDFS; Pig (`MostRatedFiveStarMovie` e `OldestFiveStarMovie`) no YARN e em modo local; workflow original do Oozie, com ação Sqoop (MariaDB para o HDFS) e ação Hive", "Passou"],
+    ["8a", "Hive: `SELECT COUNT(*) FROM ratings` igual a 100000 e `MostPopularMovie.sql` (Star Wars); `sqoop import` da tabela `movies`; mrjob em modo local e no YARN", "Passou"],
+    ["8b", "`create 'users'` no `hbase shell`; Pig com `HBaseStorage` lendo 943 usuários; Phoenix pelo `sqlline.py`", "Passou, passou e **pulado** (Phoenix)"],
+    ["8c", "Containers `mongo` e `cassandra`; `CassandraSpark.py` e `MongoSpark.py` no Spark 2, com 943 registros em cada", "Passou"],
+    ["9", "Kafka: criar tópico, produzir e consumir; Flume do netcat para o logger; topologia `WordCountTopology` ativa no Storm; Flink no ar na porta 8082", "Passou"],
+    ["12", "Flume (porta avro 9092) para o `SparkFlume.py` no Spark 2, contando URLs; `structured-streaming.py` no Spark 3, contando respostas 200", "Passou"],
+    ["trabalho", "Envio do `imdb-reviews-pt-br.csv` para o HDFS, `copyToLocal` e `spark-submit` no Spark 3 com o script de referência: soma 459568555 e diferença de palavras entre 54000 e 55000", "Passou"],
+  ], [1.6, 6, 2]),
+  P("Não são verificados automaticamente, por dependerem de passos manuais do roteiro: Drill 1.21.2 e Presto 0.235.1 (perfil 8d), Zeppelin, Kafka Connect (`connect-standalone.sh`) e o Flume lendo de uma pasta para o HDFS. Eles funcionam, mas são conferidos à mão."),
+  H2("10.3 Limitações conhecidas"),
+  P("Estas são as diferenças que não foi possível eliminar. Nenhuma delas impede o estudo do tema correspondente."),
+  Bullet("**O Phoenix não conecta.** O Phoenix 5.1.3 que vem no ODP 1.2.4 é incompatível com o HBase 2.5.6 da mesma distribuição: a conexão falha com um erro de protobuf, tanto no `sqlline.py` quanto no Query Server. A imagem já traz corrigidos o `phoenix_utils.py` e o `sqlline`, que vinham quebrados, para o dia em que houver um cliente compatível. Enquanto isso, o tema é coberto pelo `hbase shell`, pelo Pig com `HBaseStorage` e pelo Spark."),
+  Bullet("**Pig View e Hive View do Ambari não existem** nesta versão: o Pig View depende do WebHCat, que não faz parte do ODP. O Files View e o Workflow Manager, do Oozie, funcionam normalmente."),
+  Bullet("**O Spark2 History Server não sobe** como componente do Ambari, e nenhum perfil o utiliza. O Spark 3 roda fora do Ambari, como cliente puro, porque as duas versões não coexistem no mesmo cluster do ODP."),
+  Bullet("**A interface do NameNode fica em `localhost:9870`**, e não na 50070 dos vídeos, porque o Windows reserva a faixa 50000 a 50959."),
+  Bullet("O Cassandra 3.11 precisa de 1,5 GB. Com 1 GB ele é encerrado por falta de memória."),
+  Bullet("A imagem é grande: cerca de 16 GB de download e 21 GB em disco. A instalação do ODP traz componentes extras como dependência, entre eles o Java 17, que o Storm utiliza."),
+  Note("Quer repetir os testes?", "Os testes são scripts, e ficam em `tests/`. Com a sandbox no ar, execute `bash tests/ci.sh aula10 aula07 aula08 aula09 aula12 trabalho` no Git Bash ou no WSL; a bateria completa leva cerca de uma hora e meia. O teste da Atividade Prática só roda se o arquivo `data/imdb-reviews-pt-br.csv` estiver na pasta."),
+];
+
 // ---------------------------------------------------------------- apêndices
 const apA = [
   H1("Apêndice A — Versões dos componentes"),
@@ -641,14 +666,60 @@ const apC = [
 ];
 
 // ---------------------------------------------------------------- documento
-const header = new Header({ children: [new Paragraph({
-  alignment: AlignmentType.RIGHT, border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "BFBFBF", space: 4 } },
-  children: [new TextRun({ text: "Sandbox Big Data — Guia do Aluno", font: FONT, size: 18, color: "666666" })],
-})] });
-const footer = new Footer({ children: [new Paragraph({
-  alignment: AlignmentType.CENTER,
-  children: [new TextRun({ text: "Big Data — UNINTER  ·  Página ", font: FONT, size: 18, color: "666666" }), new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 18, color: "666666" }), new TextRun({ text: " de ", font: FONT, size: 18, color: "666666" }), new TextRun({ children: [PageNumber.TOTAL_PAGES], font: FONT, size: 18, color: "666666" })],
-})] });
+// ---------------------------------------------------------------- apêndice D
+const apD = [
+  H1("Apêndice D — Manutenção da sandbox"),
+  Note("Este apêndice não é necessário para o aluno", "Ele descreve como a imagem é construída, testada e publicada. Está aqui para que o material fique completo em um único arquivo e para quem queira adaptar a sandbox a outra disciplina ou instituição. Para estudar, basta o que vai dos capítulos 1 a 10."),
+  H2("D.1 Estrutura do repositório"),
+  ...Code([
+    "docker-compose.yml   sandbox + containers auxiliares (mongo, cassandra)",
+    "lab.cmd              ponto de entrada no Windows (chama o lab.ps1)",
+    "lab.ps1 / lab.sh     atalhos no computador do aluno",
+    "publish.ps1          publicação da imagem (registro ou arquivo .tar.gz)",
+    "sandbox/             Dockerfile e scripts de build/runtime da imagem",
+    "  build/             10-os, 20-repos, 30-ambari, 40-blueprint, 50-extras,",
+    "                     55-downloads, 60-python, 70-ivy-cache, prefetch.sh,",
+    "                     blueprint e perfis de memória",
+    "  runtime/           entrypoint.sh, CLI lab, aulas.map, ambari-config.py",
+    "aulas/               arquivos das aulas 7 a 12 e do trabalho + GUIA.md por aula",
+    "data/                ml-100k, customer-orders, access_log, movielens.sql",
+    "docs/                instalação, memória, diferenças, validação, FAQ, este guia",
+    "docs/guia-src/       fonte deste guia (docx-js): build.js e lib.js",
+    "tests/               testes de fumaça por aula + ci.sh",
+  ]),
+  H2("D.2 Construir a imagem"),
+  P("Leva de 60 a 90 minutos e baixa cerca de 5 GB de pacotes do ODP e 3 GB de tarballs. O `prefetch.sh` baixa os tarballs uma vez e evita os limites de taxa dos espelhos."),
+  ...Code(["bash sandbox/build/prefetch.sh", ".\\lab.cmd build"]),
+  P("Mudanças apenas em `sandbox/runtime/` reconstroem só o último estágio, em poucos minutos."),
+  H2("D.3 Testes"),
+  ...Code([
+    "bash tests/ci.sh aula10                                    # um perfil",
+    "bash tests/ci.sh aula07 aula08 aula09 aula10 aula12 trabalho",
+  ]),
+  P("O resultado da última bateria completa está no capítulo 10."),
+  H2("D.4 Publicar a imagem"),
+  P("A imagem fica no GitHub Container Registry, como pacote da organização dona do repositório. Não é preciso conta em outro serviço: o login é a mesma conta do GitHub, com um token que tenha o escopo `write:packages`."),
+  ...Code([
+    "gh auth refresh -h github.com -s write:packages",
+    "gh auth token | docker login ghcr.io -u <usuario> --password-stdin",
+    ".\\publish.ps1 -Mode registry -Version 1.0.1 \\",
+    "    -Registry ghcr.io/n-cpuninter/bigdata-sandbox",
+  ]),
+  P("Depois do primeiro envio, é preciso abrir [os pacotes da organização](https://github.com/orgs/N-CPUninter/packages), escolher `bigdata-sandbox` e mudar a visibilidade para **Public**. Com o pacote público o aluno baixa sem login e sem cota; enquanto ele estiver privado, cada aluno precisaria de um token próprio."),
+  P("Para distribuir sem registro, por pendrive ou drive compartilhado: `.\\publish.ps1 -Mode save -Version 1.0.1` gera um `.tar.gz`, que o aluno carrega com `docker load -i`."),
+  H2("D.5 Build automático"),
+  P("O workflow `build-sandbox`, do GitHub Actions, reconstrói a imagem no servidor do GitHub quando muda algo que entra nela: `sandbox/`, `docker-compose.yml`, `tests/` ou o próprio workflow. Alterar a documentação ou os arquivos das aulas não dispara build, porque esse conteúdo é montado da pasta do aluno em tempo de execução."),
+  P("Todo build publica duas marcas: `:edge`, o último build da branch principal, e `:sha-<commit>`, rastreável. Em seguida roda o teste de fumaça da aula 10 contra a imagem recém-publicada."),
+  Note("A marca `:latest` não é movida automaticamente", "É ela que os alunos baixam, e um build quebrado no meio do semestre pararia a turma inteira. Para promover, depois de conferir que o build passou: aba **Actions**, workflow **build-sandbox**, botão **Run workflow**, preenchendo o campo **versao** (por exemplo `1.0.2`). A imagem já testada é copiada para `:<versao>` e `:latest`, sem reconstruir nada."),
+  H2("D.6 Atualizar este guia"),
+  P("O PDF e o DOCX são gerados por script, não editados à mão. O texto fica em `docs/guia-src/build.js` e a formatação em `docs/guia-src/lib.js`; a exportação para PDF usa o Word, que também atualiza o sumário."),
+  ...Code(["cd docs/guia-src && npm install docx@9      # só na primeira vez", "node build.js ../Guia-do-Aluno.docx"]),
+  H2("D.7 Licença"),
+  P("Os scripts deste repositório são distribuídos sob a licença MIT. Os componentes incluídos (Hadoop, Hive, Spark, Ambari/ODP e demais) seguem a licença Apache 2.0 de cada projeto."),
+];
+
+const header = Cabecalho(["Sandbox Big Data", "Guia do Aluno — Big Data"]);
+const footer = Rodape();
 
 const bulletLevel = (lvl) => ({ level: lvl, format: LevelFormat.BULLET, text: lvl === 0 ? "•" : "–", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 720 + lvl * 360, hanging: 360 } } } });
 const numLevel = () => ({ level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 720, hanging: 360 } } } });
@@ -659,11 +730,7 @@ const doc = new Document({
   description: "Guia de instalação e uso da sandbox Docker que substitui a VM HDP 2.6.5 na disciplina de Big Data (UNINTER).",
   styles: {
     default: { document: { run: { font: FONT, size: 22 } } },
-    paragraphStyles: [
-      { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true, run: { font: FONT, size: 34, bold: true, color: BLUE }, paragraph: { spacing: { before: 360, after: 200 }, outlineLevel: 0, border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: BLUE, space: 4 } } } },
-      { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true, run: { font: FONT, size: 27, bold: true, color: BLUE }, paragraph: { spacing: { before: 280, after: 140 }, outlineLevel: 1 } },
-      { id: "Heading3", name: "Heading 3", basedOn: "Normal", next: "Normal", quickFormat: true, run: { font: FONT, size: 23, bold: true, color: "2E5A88" }, paragraph: { spacing: { before: 200, after: 100 }, outlineLevel: 2 } },
-    ],
+    paragraphStyles: estilosTitulo,
   },
   numbering: { config: [
     { reference: "bullets", levels: [bulletLevel(0), bulletLevel(1)] },
@@ -674,9 +741,10 @@ const doc = new Document({
   ] },
   features: { updateFields: true },
   sections: [
-    { properties: { page: { size: { width: PAGE_W, height: 16838 }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } }, children: capa },
-    { properties: { page: { size: { width: PAGE_W, height: 16838 }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } }, headers: { default: header }, footers: { default: footer },
-      children: [...sumario, ...intro, ...instal, ...uso, ...amb, ...aulas, ...trab, ...mem, ...prob, ...faq, ...apA, ...apB, ...apC] },
+    { properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: MARGIN_V, bottom: MARGIN_V, left: MARGIN, right: MARGIN } } }, children: capa },
+    { properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: MARGIN_V, bottom: MARGIN_V, left: MARGIN, right: MARGIN, header: 709, footer: 284 } } },
+      headers: { default: header }, footers: { default: footer },
+      children: [...sumario, ...intro, ...instal, ...uso, ...amb, ...aulas, ...trab, ...mem, ...prob, ...faq, ...valid, ...apA, ...apB, ...apC, ...apD] },
   ],
 });
 

@@ -29,7 +29,7 @@
 
 ## Primeira subida
 
-- A imagem tem ~8 GB; o download depende da sua internet.
+- O download da imagem são ~16 GB (ela ocupa ~21 GB em disco); o tempo depende da sua internet.
 - Na primeira vez o Ambari leva 2–4 minutos para responder; `.\lab.cmd up` espera por isso.
 - Depois, `.\lab.cmd aula <perfil>`; o Ambari mostra o progresso em "Background Operations".
 

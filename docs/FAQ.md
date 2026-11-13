@@ -138,7 +138,7 @@ Não. Feche a tela de login com **Skip** ou **Continue without signing in**. A i
 
 ### O download é muito grande e a conexão caiu no meio
 
-A imagem tem cerca de 22 GB e é baixada **uma única vez**. Se a conexão cair, repita o comando: o Docker retoma de onde parou, camada por camada. Prefira rede por cabo ou um Wi-Fi estável, e evite redes com limite de dados.
+O download são cerca de 16 GB, feitos **uma única vez**; na sua máquina a imagem ocupa cerca de 21 GB. Se a conexão cair, repita o comando: o Docker retoma de onde parou, camada por camada. Prefira rede por cabo ou um Wi-Fi estável, e evite redes com limite de dados.
 
 ### "no space left on device" ou o Docker reclama de disco
 

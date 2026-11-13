@@ -87,7 +87,7 @@ Se o seu computador não dá conta (menos de 8 GB, ou um Mac antigo), a Atividad
    ```bash
    ./lab.sh up       # macOS e Linux
    ```
-   Na primeira vez o Docker baixa a imagem, que tem vários GB: pode levar de vinte minutos a algumas horas, conforme a sua internet. Depois disso, subir leva cerca de um minuto.
+   Na primeira vez o Docker baixa a imagem, que tem cerca de 16 GB: pode levar de vinte minutos a algumas horas, conforme a sua internet. Depois disso, subir leva cerca de um minuto.
 
 Repare no `.\` do começo e na terminação `.cmd`: assim o comando funciona tanto no PowerShell quanto no Prompt de Comando. O `lab.cmd` é um atalho de três linhas que chama o `lab.ps1`, onde está toda a lógica; ele existe porque o Windows bloqueia por padrão os scripts `.ps1` baixados da internet, e chamar o `.\lab.ps1` diretamente falha na primeira vez em boa parte dos computadores. Pelo `.\lab.cmd` esse bloqueio não aparece e nada precisa ser mudado nas configurações do Windows.
 
@@ -284,7 +284,7 @@ Lista completa, com mais casos e as mensagens de erro exatas: [docs/TROUBLESHOOT
 
 Outros documentos úteis:
 
-- [docs/Guia-do-Aluno.pdf](docs/Guia-do-Aluno.pdf) — tudo isto em PDF, com índice e perguntas frequentes.
+- [docs/Guia-do-Aluno.pdf](docs/Guia-do-Aluno.pdf) — **o documento completo**: reúne tudo o que está nesta página e em todos os arquivos de `docs/`, com sumário navegável. É o arquivo publicado na rota de estudos; os demais documentos abaixo são as mesmas informações em partes menores.
 - [docs/FAQ.md](docs/FAQ.md) — perguntas frequentes, com as travas de política do Windows.
 - [aulas/ERRATA.md](aulas/ERRATA.md) — o que mudou nos comandos em relação aos vídeos.
 - [docs/DIFERENCAS-HDP.md](docs/DIFERENCAS-HDP.md) — o que é diferente da VM antiga e por quê.
